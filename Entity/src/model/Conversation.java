@@ -6,57 +6,30 @@ package model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
- * @author hp
+ * @author phamthainb
  */
-public class Conversation implements Serializable{
+@Entity
+@Table(name = "conversation")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Conversation extends BaseEntity {
 
-    private Long id;
+    @Column
     private String name;
-    private ArrayList<User> users;
 
-    public Conversation() {
-    }
-
-    public Conversation(String name, ArrayList<User> users) {
-        this.id = id;
-        this.name = name;
-        this.users = users;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public ArrayList<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(ArrayList<User> users) {
-        this.users = users;
-    }
-
-    @Override
-    public String toString() {
-        return "Conversation{" +
-                "id=" + id +
-                ", name=" + name +
-                '}';
-    }
-
-    
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<User> users;
 }

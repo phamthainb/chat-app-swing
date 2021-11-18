@@ -5,57 +5,36 @@
 package model;
 
 import java.io.Serializable;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
- * @author hp
+ * @author phamthainb
  */
-public class Message implements Serializable {
+@Entity
+@Table(name = "message")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Message extends BaseEntity {
 
-    private Long id;
+    @Column(name = "content")
     private String content;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_user", referencedColumnName = "id")
     private User user;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_conversation", referencedColumnName = "id")
     private Conversation conversation;
-
-    public Message() {
-    }
-
-    public Message(String content, User user, Conversation conversation) {
-        this.content = content;
-        this.user = user;
-        this.conversation = conversation;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Conversation getConversation() {
-        return conversation;
-    }
-
-    public void setConversation(Conversation conversation) {
-        this.conversation = conversation;
-    }
 
 }

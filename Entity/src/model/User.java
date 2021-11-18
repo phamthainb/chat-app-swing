@@ -1,71 +1,34 @@
 package model;
+
 import java.io.Serializable;
- 
-public class User implements Serializable{
-    private static final long serialVersionUID = 20210811010L;
-    private Long id;
-    private String username;
-    private String password;
-    private int online = 0;
-     
-    public User() {
-        super();
-    }
- 
-    public User(String username, String password) {
-        super();
-        this.username = username;
-        this.password = password;
-    }
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "user")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class User extends BaseEntity{
     
-    public User(String username, Long id) {
-        super();
-        this.username = username;
-        this.id = id;
-    }
-
-    public User(Long id, String username, int online) {
-        this.id = id;
-        this.username = username;
-        this.online = online;
-    }
-
-    public int getOnline() {
-        return online;
-    }
-
-    public void setOnline(int online) {
-        this.online = online;
-    }
- 
-    public Long getId() {
-        return id;
-    }
- 
-    public void setId(Long id) {
-        this.id = id;
-    }
- 
-    public String getUsername() {
-        return username;
-    }
- 
-    public void setUsername(String username) {
-        this.username = username;
-    }
- 
-    public String getPassword() {
-        return password;
-    }
- 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" + "id=" + id + ", username=" + username + '}';
-    }
-
- 
+    @Column(name = "username")
+    private String username;
+    
+    @Column(name = "password")
+    private String password;
+    
+    @Column(name = "online")
+    private int online = 0; // last time online
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Conversation conversation;
 }

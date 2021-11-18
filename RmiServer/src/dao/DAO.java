@@ -1,20 +1,21 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.io.File;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.cfg.Configuration;
 
 public class DAO {
 
-    public static Connection con;
+    public static Session session;
 
     public DAO() {
-        if (con == null) {
-            String dbUrl = "jdbc:mysql://localhost:3306/chat-app-swing?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true";
-            String dbClass = "com.mysql.cj.jdbc.Driver";
-
+        if (session == null) {
             try {
-                Class.forName(dbClass);
-                con = DriverManager.getConnection(dbUrl, "", "");
+                session = new Configuration().configure(new File("src/hibernate.cfg.xml"))
+                        .buildSessionFactory().openSession();
+            } catch (HibernateException ex) {
+                ex.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
             }

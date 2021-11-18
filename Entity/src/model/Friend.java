@@ -1,56 +1,36 @@
 package model;
- 
-import java.io.Serializable;
- 
-public class Friend implements Serializable{
-    private static final long serialVersionUID = 20210811004L;
-    private Long id;
-    private Long user_id_1;  // sent
-    private Long user_id_2;  // receive
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ *
+ * @author sonht
+ */
+
+@Entity
+@Table(name = "friend")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Friend extends BaseEntity {
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_user_1", referencedColumnName = "id")
+    private User user_id_1;  // sent
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_user_2", referencedColumnName = "id")
+    private User user_id_2;  // receive
+    
+    @Column
     private boolean confirmed;
 
-    public Friend(Long user_id_1, Long user_id_2, boolean confirmed) {
-        this.user_id_1 = user_id_1;
-        this.user_id_2 = user_id_2;
-        this.confirmed = confirmed;
-    }
-
-    public Friend() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUser_id_1() {
-        return user_id_1;
-    }
-
-    public void setUser_id_1(Long user_id_1) {
-        this.user_id_1 = user_id_1;
-    }
-
-    public Long getUser_id_2() {
-        return user_id_2;
-    }
-
-    public void setUser_id_2(Long user_id_2) {
-        this.user_id_2 = user_id_2;
-    }
-
-    public boolean isConfirmed() {
-        return confirmed;
-    }
-
-    public void setConfirmed(boolean confirmed) {
-        this.confirmed = confirmed;
-    }
-   
-    
-     
-    
 }
