@@ -126,7 +126,10 @@ public class SignupFrm extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(rootPane, "Passwords not match");
         }
         else {
-            mySocket.sendData(new ObjectWrapper(ObjectWrapper.SIGNUP_USER, new User(username, password)));
+            User input = new User();
+            input.setUsername(username);
+            input.setPassword(password);
+            mySocket.sendData(new ObjectWrapper(ObjectWrapper.SIGNUP_USER, input));
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 

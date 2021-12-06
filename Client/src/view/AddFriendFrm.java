@@ -5,8 +5,7 @@
 package view;
 
 import control.ClientCtr;
-import dto.AddFriendDTO;
-import dto.RequestDTO;
+import java.awt.Frame;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -24,27 +23,26 @@ public class AddFriendFrm extends javax.swing.JDialog {
      */
     private Long id;
     private ClientCtr mySocket;
-    private ArrayList<AddFriendDTO> users;
-    private AddFriendDTO selected = null;
+    private ArrayList<User> users;
+    private Frame parent;
 
-    public AddFriendFrm(java.awt.Frame parent, boolean modal, Long id, ClientCtr mySocket) {
+    public AddFriendFrm(Frame parent, boolean modal, Long id, ClientCtr mySocket) {
         super(parent, modal);
         initComponents();
         this.id = id;
         this.mySocket = mySocket;
+        this.parent = parent;
 
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_GET_LIST_USER, this));
-        this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_ADD_FRIEND, this));
-        this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CONFIRM_FRIEND, this));
-        this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_DECLINE_FRIEND, this));
-
-        resetUI();
 
     }
 
     private void getUsers() {
         String username = usernameTxt.getText();
-        mySocket.sendData(new ObjectWrapper(ObjectWrapper.GET_LIST_USER, new User(username, this.id)));
+        User input = new User();
+        input.setUsername(username);
+        input.setId(this.id);
+        mySocket.sendData(new ObjectWrapper(ObjectWrapper.GET_LIST_USER, input));
     }
 
     /**
@@ -61,10 +59,7 @@ public class AddFriendFrm extends javax.swing.JDialog {
         usernameTxt = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         userTbl = new javax.swing.JTable();
-        add = new javax.swing.JButton();
         usernameLabel = new javax.swing.JLabel();
-        cancel = new javax.swing.JButton();
-        accept = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -100,27 +95,6 @@ public class AddFriendFrm extends javax.swing.JDialog {
         });
         jScrollPane1.setViewportView(userTbl);
 
-        add.setText("Add");
-        add.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addActionPerformed(evt);
-            }
-        });
-
-        cancel.setText("Cancel");
-        cancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelActionPerformed(evt);
-            }
-        });
-
-        accept.setText("Accept");
-        accept.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                acceptActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -134,12 +108,9 @@ public class AddFriendFrm extends javax.swing.JDialog {
                             .addComponent(usernameTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 336, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(add, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE)
-                            .addComponent(usernameLabel)
-                            .addComponent(cancel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(accept, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(usernameLabel))))
                 .addContainerGap(121, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -155,12 +126,7 @@ public class AddFriendFrm extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 71, Short.MAX_VALUE)
                         .addComponent(usernameLabel)
-                        .addGap(18, 18, 18)
-                        .addComponent(add)
-                        .addGap(18, 18, 18)
-                        .addComponent(accept)
-                        .addGap(32, 32, 32)
-                        .addComponent(cancel))
+                        .addGap(152, 152, 152))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(31, 31, 31)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
@@ -176,52 +142,8 @@ public class AddFriendFrm extends javax.swing.JDialog {
 
     private void userTblMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_userTblMouseClicked
         int index = userTbl.getSelectedRow();
-        accept.setVisible(false);
-        add.setVisible(false);
-        cancel.setVisible(false);
 
-        selected = users.get(index);
-
-        if (selected != null) {
-            usernameLabel.setText(selected.getUsername());
-            if (selected.getFriendId() == 0) {
-                add.setVisible(true);
-            } else {
-                if (selected.getConfirmed() == 0) {
-                    if (selected.getFromId().equals(id)) {
-                        cancel.setVisible(true);
-                    } else {
-                        accept.setVisible(true);
-                    }
-                }
-            }
-        }
     }//GEN-LAST:event_userTblMouseClicked
-
-    private void addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addActionPerformed
-        if (selected != null) {
-            ArrayList<Long> ids = new ArrayList<>();
-            ids.add(id);
-            ids.add(selected.getUserId());
-            mySocket.sendData(new ObjectWrapper(ObjectWrapper.ADD_FRIEND, ids));
-        }
-    }//GEN-LAST:event_addActionPerformed
-
-    private void acceptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acceptActionPerformed
-        if (selected != null) {
-            RequestDTO input = new RequestDTO(selected.getToId(), selected.getFriendId(), selected.getUsername(), selected.getFromId());
-            mySocket.sendData(new ObjectWrapper(ObjectWrapper.CONFIRM_FRIEND, input));
-        }
-    }//GEN-LAST:event_acceptActionPerformed
-
-    private void cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelActionPerformed
-        if (selected != null) {
-            RequestDTO input = new RequestDTO();
-            input.setFriendId(selected.getFriendId());
-            input.setToId(selected.getToId());
-            mySocket.sendData(new ObjectWrapper(ObjectWrapper.DECLINE_FRIEND, input));
-        }
-    }//GEN-LAST:event_cancelActionPerformed
 
     /**
      * @param args the command line arguments
@@ -267,13 +189,11 @@ public class AddFriendFrm extends javax.swing.JDialog {
 
     private void mapToTable() {
         if (users.size() >= 0) {
-            String columns[] = {"ID", "Username", "Is friend", "Is sending request"};
+            String columns[] = {"ID", "Username"};
             String[][] values = new String[users.size()][columns.length];
             for (int i = 0; i < users.size(); i++) {
-                values[i][0] = users.get(i).getUserId() + "";
+                values[i][0] = users.get(i).getId() + "";
                 values[i][1] = users.get(i).getUsername() + "";
-                values[i][2] = users.get(i).getConfirmed() == 1 ? "x" : "";
-                values[i][3] = users.get(i).getConfirmed() == 0 && users.get(i).getFromId().equals(id) ? "x" : "";
             }
             DefaultTableModel table = new DefaultTableModel(values, columns) {
                 @Override
@@ -283,15 +203,6 @@ public class AddFriendFrm extends javax.swing.JDialog {
             };
             userTbl.setModel(table);
         }
-        resetUI();
-    }
-
-    private void resetUI() {
-        selected = null;
-        accept.setVisible(false);
-        add.setVisible(false);
-        cancel.setVisible(false);
-        usernameLabel.setText("");
     }
 
     public void receivedDataProcessing(ObjectWrapper data) {
@@ -299,37 +210,11 @@ public class AddFriendFrm extends javax.swing.JDialog {
         switch (data.getPerformative()) {
             // reply add friend
             case ObjectWrapper.REPLY_GET_LIST_USER:
-                users = (ArrayList<AddFriendDTO>) data.getData();
+                users = (ArrayList<User>) data.getData();
                 if (users.size() >= 0) {
                     mapToTable();
                 } else {
                     JOptionPane.showMessageDialog(this, "Error in fetching!");
-                }
-                break;
-            case ObjectWrapper.REPLY_ADD_FRIEND:
-                if ((boolean) data.getData()) {
-                    getUsers();
-                    mapToTable();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Error in sending request");
-                }
-                break;
-            case ObjectWrapper.REPLY_CONFIRM_FRIEND:
-                if ((boolean) data.getData()) {
-                    getUsers();
-                    mapToTable();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Error in confirming");
-                }
-                break;
-
-            case ObjectWrapper.REPLY_DECLINE_FRIEND:
-                boolean res = (boolean) data.getData();
-                if (res) {
-                    getUsers();
-                    mapToTable();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Error in canceling");
                 }
                 break;
             default:
@@ -338,9 +223,6 @@ public class AddFriendFrm extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton accept;
-    private javax.swing.JButton add;
-    private javax.swing.JButton cancel;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;

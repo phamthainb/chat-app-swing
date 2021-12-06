@@ -300,7 +300,7 @@ public class MainFrm extends javax.swing.JFrame {
                 sidebar.setVisible(true);
                 loginPane.setVisible(false);
                 this.info = (User) data.getData();
-                jLabel4.setText("Welcome " + info.getUsername());
+                jLabel4.setText("Welcome, " + info.getUsername());
                 triggerStatus(1);
             } else {
                 JOptionPane.showMessageDialog(this, "Login fail!");

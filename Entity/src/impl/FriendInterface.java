@@ -7,6 +7,7 @@ package impl;
 import dto.RequestDTO;
 import java.util.ArrayList;
 import model.User;
+import model.Friend;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -25,4 +26,6 @@ public interface FriendInterface extends Remote {
     public Long confirmFriend(RequestDTO requestDTO) throws RemoteException;
 
     public Long declineFriend(Long friendId, Long toId) throws RemoteException;
+
+    public Friend getFriend(Friend friend) throws RemoteException;
 }

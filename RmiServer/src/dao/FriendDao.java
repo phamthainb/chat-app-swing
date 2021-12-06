@@ -5,11 +5,9 @@
 package dao;
 
 import dto.RequestDTO;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import model.User;
+import model.Friend;
 
 /**
  *
@@ -18,6 +16,10 @@ import model.User;
 public class FriendDao extends DAO {
 
     public FriendDao() {
+    }
+
+    public Friend getFriend(Friend friend) {
+        return null;
     }
 
     public ArrayList<User> getFriends(Long id) {

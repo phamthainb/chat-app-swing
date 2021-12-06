@@ -24,6 +24,7 @@ import view.FriendFrm;
 import view.MainFrm;
 import view.RequestFrm;
 import view.SignupFrm;
+import view.UserDetailFrm;
 
 public class ClientCtr {
 
@@ -99,6 +100,7 @@ public class ClientCtr {
             FriendFrm friendFrm;
             ChatCreateConvertstationFrm chatCreateConvertstationFrm;
             ChatConverstationFrm chatConverstationFrm;
+            UserDetailFrm userDetailFrm;
             try {
                 while (true) {
                     ObjectInputStream ois = new ObjectInputStream(mySocket.getInputStream());
@@ -214,6 +216,14 @@ public class ClientCtr {
                                         } else if (fto.getData() instanceof ChatCreateConvertstationFrm) {
                                             chatCreateConvertstationFrm = (ChatCreateConvertstationFrm) fto.getData();
                                             chatCreateConvertstationFrm.receivedDataProcessing(data);
+                                        }
+                                        break;
+                                    }
+
+                                    case ObjectWrapper.REPLY_GET_FRIEND_BY_USER: {
+                                        if (fto.getData() instanceof UserDetailFrm) {
+                                            userDetailFrm = (UserDetailFrm) fto.getData();
+                                            userDetailFrm.receivedDataProcessing(data);
                                         }
                                         break;
                                     }

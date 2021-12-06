@@ -9,7 +9,6 @@ import java.rmi.registry.Registry;
 
 import model.IPAddress;
 import model.User;
-import impl.AuthInterface;
 import impl.ChatInterface;
 import impl.FriendInterface;
 import impl.UserInterface;
@@ -22,7 +21,6 @@ import view.ServerMainFrm;
 public class RmiClient {
 
     private ServerMainFrm view;
-    private AuthInterface authRo;
     private UserInterface userRo;
     private FriendInterface friendRo;
     private ChatInterface chatRo;
@@ -46,7 +44,6 @@ public class RmiClient {
             // get the registry
             Registry registry = LocateRegistry.getRegistry(serverAddress.getHost(), serverAddress.getPort());
             // lookup the remote objects
-            authRo = (AuthInterface) (registry.lookup(rmiService));
             userRo = (UserInterface) (registry.lookup(rmiService));
             friendRo = (FriendInterface) (registry.lookup(rmiService));
             chatRo = (ChatInterface) (registry.lookup(rmiService));
@@ -61,7 +58,7 @@ public class RmiClient {
 
     public User remoteLogin(User user) {
         try {
-            return authRo.login(user);
+            return userRo.login(user);
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return null;
@@ -70,16 +67,16 @@ public class RmiClient {
 
     public boolean remoteSignup(User user) {
         try {
-            return authRo.signup(user);
+            return userRo.signup(user);
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return false;
         }
     }
 
-    public ArrayList<AddFriendDTO> remoteGetUsers(Long myId, String username) {
+    public ArrayList<User> remoteGetUsers(User user) {
         try {
-            return userRo.getUsers(myId, username);
+            return userRo.getUsers(user);
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return null;
@@ -160,9 +157,9 @@ public class RmiClient {
         }
     }
 
-    public boolean remoteTriggerStatus(Long id, int status) {
+    public boolean remoteTriggerStatus(User user) {
         try {
-            authRo.triggerStatus(id, status);
+            userRo.triggerStatus(user);
             return true;
         } catch (RemoteException ex) {
             ex.printStackTrace();

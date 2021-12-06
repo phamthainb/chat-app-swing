@@ -5,7 +5,6 @@
 package control;
 
 import dao.UserDao;
-import impl.AuthInterface;
 import impl.UserInterface;
 import java.net.InetAddress;
 import java.rmi.RemoteException;
@@ -27,12 +26,13 @@ import model.Conversation;
 import model.Message;
 import dao.ConversartionDAO;
 import dao.MessageDAO;
+import model.Friend;
 
 /**
  *
  * @author son
  */
-public class ServerCtr extends UnicastRemoteObject implements AuthInterface, UserInterface, FriendInterface, ChatInterface {
+public class ServerCtr extends UnicastRemoteObject implements UserInterface, FriendInterface, ChatInterface {
 
     private IPAddress myAddress = new IPAddress("localhost", 7611);
     private Registry registry;
@@ -100,8 +100,8 @@ public class ServerCtr extends UnicastRemoteObject implements AuthInterface, Use
     }
 
     @Override
-    public ArrayList<AddFriendDTO> getUsers(Long myId, String username) throws RemoteException {
-        return userDao.getUsers(myId, username);
+    public ArrayList<User> getUsers(User user) throws RemoteException {
+        return userDao.getUsers(user);
     }
 
     @Override
@@ -130,8 +130,8 @@ public class ServerCtr extends UnicastRemoteObject implements AuthInterface, Use
     }
 
     @Override
-    public void triggerStatus(Long id, int status) throws RemoteException {
-        userDao.triggerStatus(id, status);
+    public void triggerStatus(User user) throws RemoteException {
+        userDao.triggerStatus(user);
     }
 
     @Override
@@ -157,5 +157,10 @@ public class ServerCtr extends UnicastRemoteObject implements AuthInterface, Use
     @Override
     public boolean sendMessage(SendMessageDTO sendMessageDTO) throws RemoteException {
         return mdao.sendMessage(sendMessageDTO);
+    }
+
+    @Override
+    public Friend getFriend(Friend friend) throws RemoteException {
+        return friendDao.getFriend(friend);
     }
 }

@@ -157,7 +157,6 @@ public class ServerCtr {
             User resUser = null;
             User inputUser = null;
 
-            ArrayList<AddFriendDTO> userList = new ArrayList<>();
             ArrayList<Long> ids = new ArrayList<>();
             Long fromId = null;
             Long toId = null;
@@ -192,10 +191,10 @@ public class ServerCtr {
                                 break;
 
                             case ObjectWrapper.GET_LIST_USER:
-                                resUser = (User) data.getData();
-                                userList = (ArrayList<AddFriendDTO>) rmiClient.remoteGetUsers(resUser.getId(), resUser.getUsername());
-                                if (userList.size() >= 0) {
-                                    oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_GET_LIST_USER, userList));
+                                inputUser = (User) data.getData();
+                                users = (ArrayList<User>) rmiClient.remoteGetUsers(inputUser);
+                                if (users.size() >= 0) {
+                                    oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_GET_LIST_USER, users));
                                 }
                                 break;
 
@@ -254,7 +253,7 @@ public class ServerCtr {
                             case ObjectWrapper.TRIGGER_STATUS:
 
                                 inputUser = (User) data.getData();
-                                booleanRes = rmiClient.remoteTriggerStatus(inputUser.getId(), inputUser.getOnline());
+                                booleanRes = rmiClient.remoteTriggerStatus(inputUser);
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_TRIGGER_STATUS, booleanRes));
                                 if (booleanRes) {
                                     broadcastClientStatus(this.getUser().getId(), 1);
@@ -343,7 +342,8 @@ public class ServerCtr {
                 view.showMessage("Number of client connecting to the server: " + myProcess.size());
                 publicClientNumber();
                 if (this.getUser() != null) {
-                    boolean res = rmiClient.remoteTriggerStatus(this.getUser().getId(), 0);
+                    this.user.setOnline(0);
+                    boolean res = rmiClient.remoteTriggerStatus(this.user);
                     if (res) {
                         System.out.println("CLIENT DISCONNECTED: " + this.getUser().getId());
                         broadcastClientStatus(this.getUser().getId(), 0);

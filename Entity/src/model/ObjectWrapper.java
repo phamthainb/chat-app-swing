@@ -53,6 +53,9 @@ public class ObjectWrapper implements Serializable {
     
     public static final int CHAT_GET_LIST_FRIEND = 32;
     public static final int REPLY_CHAT_GET_LIST_FRIEND = 33;
+    
+    public static final int GET_FRIEND_BY_USER = 34;
+    public static final int REPLY_GET_FRIEND_BY_USER = 35;
 
     private int performative;
     private Object data;
