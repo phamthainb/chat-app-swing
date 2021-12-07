@@ -6,6 +6,9 @@ package dao;
 
 import dto.RequestDTO;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import model.User;
 import model.Friend;
 
@@ -19,109 +22,158 @@ public class FriendDao extends DAO {
     }
 
     public Friend getFriend(Friend friend) {
+        try {
+            User user1;
+            User user2;
+            Friend resFr;
+            session.clear();
+            user1 = (User) session.createQuery("from User u where u.id = :id")
+                    .setParameter("id", friend.getUser_1().getId()).uniqueResult();
+            user2 = (User) session.createQuery("from User u where u.id = :id")
+                    .setParameter("id", friend.getUser_2().getId()).uniqueResult();
+            resFr = (Friend) session.createNativeQuery("select * from friend where (friend.id_user_1 = :id1 and friend.id_user_2 = :id2) "
+                    + "or (friend.id_user_1 = :id2 and friend.id_user_2 = :id1)", Friend.class)
+                    .setParameter("id1", friend.getUser_1().getId())
+                    .setParameter("id2", friend.getUser_2().getId())
+                    .uniqueResult();
+            if (resFr == null) {
+                resFr = new Friend();
+            }
+            if (resFr.getUser_2() != null && resFr.getUser_2().getId().equals(user1.getId())) {
+                resFr.setUser_1(user2);
+                resFr.setUser_2(user1);
+            } else {
+                resFr.setUser_2(user2);
+                resFr.setUser_1(user1);
+            }
+            return resFr;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
-    public ArrayList<User> getFriends(Long id) {
-        ArrayList<User> res = new ArrayList<>();
-//        String sql = "select distinct * from user where not user.id=? and user.id in (select distinct user.id from user, friend where (user.id = friend.user_id_1 or user.id = friend.user_id_2) and friend.confirmed=1 and (friend.user_id_1=? or friend.user_id_2=?))";
-//        try {
-//            PreparedStatement ps = con.prepareStatement(sql);
-//            ps.setLong(1, id);
-//            ps.setLong(2, id);
-//            ps.setLong(3, id);
-//
-//            ResultSet rs = ps.executeQuery();
-//            while (rs.next()) {
-//                res.add(new User(rs.getLong("id"), rs.getString("username"), rs.getInt("online")));
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+    public ArrayList<Friend> getFriends(Long id) {
+        ArrayList<Friend> friends = new ArrayList<>();
+        try {
+            List<Object[]> res = session.createNativeQuery("SELECT \n"
+                    + "    *\n"
+                    + "FROM\n"
+                    + "    user\n"
+                    + "        INNER JOIN\n"
+                    + "    (SELECT \n"
+                    + "        friend.id AS friendId,\n"
+                    + "            friend.id_user_1,\n"
+                    + "            friend.id_user_2,\n"
+                    + "            friend.confirmed\n"
+                    + "    FROM\n"
+                    + "        friend\n"
+                    + "    WHERE\n"
+                    + "        friend.id_user_1 = :id\n"
+                    + "            OR friend.id_user_2 = :id) AS friend ON (user.id = friend.id_user_1\n"
+                    + "        OR user.id = friend.id_user_2)\n"
+                    + "WHERE\n"
+                    + "    NOT user.id = :id AND friend.confirmed = 1;")
+                    .setParameter("id", id)
+                    .getResultList();
+            for (Object[] r : res) {
+                User user2 = new User();
+                Friend f = new Friend();
+
+                int online = (int) r[3];
+                String username = (String) r[5];
+                boolean confirmed = (boolean) r[9];
+                Long friendId = Long.parseLong(String.valueOf(r[6]));
+                Long userId1 = Long.parseLong(String.valueOf(r[7]));
+                Long userId2 = Long.parseLong(String.valueOf(r[8]));
+
+                user2.setUsername(username);
+                user2.setOnline(online);
+
+                if (userId1.equals(id)) {
+                    user2.setId(userId2);
+                } else {
+                    user2.setId(userId1);
+                }
+                f.setId(friendId);
+                f.setConfirmed(confirmed);
+                f.setUser_2(user2);
+                
+                friends.add(f);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return friends;
+    }
+
+    public Long addFriend(Friend friend) {
+        try {
+            session.beginTransaction();
+            session.clear();
+            session.save(friend);
+            session.getTransaction().commit();
+            return friend.getUser_2().getId();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<Friend> getRequests(Long id) {
+        ArrayList<Friend> res = new ArrayList<>();
+        try {
+            session.beginTransaction();
+            session.createQuery("update Friend fr set fr.confirmed = true where fr.id = :id")
+                    .setParameter("id", id)
+                    .executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
         return res;
     }
 
-    public boolean checkHasAddedFriend(ArrayList<Long> ids) {
-        boolean res = false;
-//        String sql = "select DISTINCT friend.id from friend where (friend.user_id_1=? and friend.user_id_2=?) or (friend.user_id_2=? and friend.user_id_1=?)";
-//        try {
-//            PreparedStatement ps = con.prepareStatement(sql);
-//            ps.setLong(1, ids.get(0));
-//            ps.setLong(2, ids.get(1));
-//            ps.setLong(3, ids.get(0));
-//            ps.setLong(4, ids.get(1));
-//
-//            ResultSet rs = ps.executeQuery();
-//            while (rs.next()) {
-//                res = true;
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        return res;
+    public Long confirmFriend(Friend fr) {
+        try {
+            session.beginTransaction();
+            session.createQuery("update Friend fr set fr.confirmed = true where fr.id = :id")
+                    .setParameter("id", fr.getId())
+                    .executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return fr.getUser_1().getId();
     }
 
-    public Long addFriend(ArrayList<Long> ids) {
-        Long userId2 = ids.get(1);
-//        if (checkHasAddedFriend(ids)) {
-//            return null;
-//        }
-//        String sql = "insert into friend (user_id_1, user_id_2, confirmed) values (?, ?, false)";
-//        try {
-//            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-//            ps.setLong(1, ids.get(0));
-//            ps.setLong(2, ids.get(1));
-//
-//            ps.executeUpdate();
-//
-//        } catch (Exception e) {
-//            userId2 = null;
-//            e.printStackTrace();
-//        }
-        return userId2;
+    public Long declineFriend(Friend fr) {
+        try {
+            session.beginTransaction();
+            session.createQuery("delete from Friend f where f.id = :id")
+                    .setParameter("id", fr.getId())
+                    .executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return fr.getUser_1().getId();
     }
 
-    public ArrayList<RequestDTO> getRequests(Long id) {
-        ArrayList<RequestDTO> res = new ArrayList<>();
-//        String sql = "select distinct user.username, friend.user_id_1 as from_id, friend.user_id_2 as to_id, friend.id as friend_id from user inner join friend on user.id=friend.user_id_1 and friend.user_id_2=? and friend.confirmed=0";
-//        try {
-//            PreparedStatement ps = con.prepareStatement(sql);
-//            ps.setLong(1, id);
-//            ResultSet rs = ps.executeQuery();
-//            while (rs.next()) {
-//                res.add(new RequestDTO(rs.getLong("to_id"), rs.getLong("friend_id"), rs.getString("username"), rs.getLong("from_id")));
-//            }
-//        } catch (Exception err) {
-//            err.printStackTrace();
-//        }
-        return res;
-    }
-
-    public Long confirmFriend(RequestDTO requestDTO) {
-//        String sql = "UPDATE friend SET confirmed=1 WHERE id=?";
-//        System.out.println("Friend ID: " + requestDTO.getFriendId());
-//        try {
-//            PreparedStatement ps = con.prepareStatement(sql);
-//            ps.setLong(1, requestDTO.getFriendId());
-//            ps.executeUpdate();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-        return requestDTO.getFromId();
-    }
-
-    public Long declineFriend(Long friendId, Long toId) {
-//        String sql = "delete from friend where id=?";
-//        try {
-//            PreparedStatement ps = con.prepareStatement(sql);
-//            ps.setLong(1, friendId);
-//            ps.executeUpdate();
-//            return toId;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-        return Long.MAX_VALUE;
+    public Long cancelFriend(Friend fr) {
+        try {
+            session.beginTransaction();
+            session.createQuery("delete from Friend f where f.id = :id")
+                    .setParameter("id", fr.getId())
+                    .executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return fr.getUser_2().getId();
     }
 }

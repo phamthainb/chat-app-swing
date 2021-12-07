@@ -17,15 +17,19 @@ import java.rmi.RemoteException;
  */
 public interface FriendInterface extends Remote {
 
-    public ArrayList<User> getFriends(Long myId) throws RemoteException;
+    public ArrayList<Friend> getFriends(Long myId) throws RemoteException;
 
-    public Long addFriend(ArrayList<Long> ids) throws RemoteException;
+    public Long addFriend(Friend friend) throws RemoteException;
 
-    public ArrayList<RequestDTO> getRequests(Long id) throws RemoteException;
+    public ArrayList<Friend> getRequests(Long id) throws RemoteException;
 
-    public Long confirmFriend(RequestDTO requestDTO) throws RemoteException;
+    public Long confirmFriend(Friend friend) throws RemoteException;
 
-    public Long declineFriend(Long friendId, Long toId) throws RemoteException;
+    public Long declineFriend(Friend friend) throws RemoteException;
+    
+    public Long cancelFriend(Friend friend) throws RemoteException;
+    
+    public Long deleteFriend(Friend friend) throws RemoteException;
 
     public Friend getFriend(Friend friend) throws RemoteException;
 }

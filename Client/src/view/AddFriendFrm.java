@@ -21,15 +21,15 @@ public class AddFriendFrm extends javax.swing.JDialog {
     /**
      * Creates new form AddFriendFrm
      */
-    private Long id;
+    private User user;
     private ClientCtr mySocket;
     private ArrayList<User> users;
     private Frame parent;
 
-    public AddFriendFrm(Frame parent, boolean modal, Long id, ClientCtr mySocket) {
+    public AddFriendFrm(Frame parent, boolean modal, User user, ClientCtr mySocket) {
         super(parent, modal);
         initComponents();
-        this.id = id;
+        this.user = user;
         this.mySocket = mySocket;
         this.parent = parent;
 
@@ -41,7 +41,7 @@ public class AddFriendFrm extends javax.swing.JDialog {
         String username = usernameTxt.getText();
         User input = new User();
         input.setUsername(username);
-        input.setId(this.id);
+        input.setId(this.user.getId());
         mySocket.sendData(new ObjectWrapper(ObjectWrapper.GET_LIST_USER, input));
     }
 
@@ -142,7 +142,7 @@ public class AddFriendFrm extends javax.swing.JDialog {
 
     private void userTblMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_userTblMouseClicked
         int index = userTbl.getSelectedRow();
-
+        new UserDetailFrm(this.parent, rootPaneCheckingEnabled, this.user, users.get(index), mySocket).setVisible(true);
     }//GEN-LAST:event_userTblMouseClicked
 
     /**

@@ -105,28 +105,28 @@ public class ServerCtr extends UnicastRemoteObject implements UserInterface, Fri
     }
 
     @Override
-    public ArrayList<User> getFriends(Long myId) throws RemoteException {
+    public ArrayList<Friend> getFriends(Long myId) throws RemoteException {
         return friendDao.getFriends(myId);
     }
 
     @Override
-    public Long addFriend(ArrayList<Long> ids) throws RemoteException {
-        return friendDao.addFriend(ids);
+    public Long addFriend(Friend friend) throws RemoteException {
+        return friendDao.addFriend(friend);
     }
 
     @Override
-    public ArrayList<RequestDTO> getRequests(Long id) throws RemoteException {
+    public ArrayList<Friend> getRequests(Long id) throws RemoteException {
         return friendDao.getRequests(id);
     }
 
     @Override
-    public Long confirmFriend(RequestDTO requestDTO) throws RemoteException {
-        return friendDao.confirmFriend(requestDTO);
+    public Long confirmFriend(Friend friend) throws RemoteException {
+        return friendDao.confirmFriend(friend);
     }
 
     @Override
-    public Long declineFriend(Long friendId, Long toId) throws RemoteException {
-        return friendDao.declineFriend(friendId, toId);
+    public Long declineFriend(Friend fr) throws RemoteException {
+        return friendDao.declineFriend(fr);
     }
 
     @Override
@@ -162,5 +162,15 @@ public class ServerCtr extends UnicastRemoteObject implements UserInterface, Fri
     @Override
     public Friend getFriend(Friend friend) throws RemoteException {
         return friendDao.getFriend(friend);
+    }
+
+    @Override
+    public Long cancelFriend(Friend friend) throws RemoteException {
+        return friendDao.cancelFriend(friend);
+    }
+
+    @Override
+    public Long deleteFriend(Friend friend) throws RemoteException {
+        return friendDao.cancelFriend(friend);
     }
 }

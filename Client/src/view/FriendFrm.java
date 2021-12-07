@@ -5,13 +5,11 @@
 package view;
 
 import control.ClientCtr;
-import dto.StatusDTO;
+import java.awt.Frame;
 import java.util.ArrayList;
-import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import model.Friend;
 import model.ObjectWrapper;
-import model.User;
 
 /**
  *
@@ -24,17 +22,20 @@ public class FriendFrm extends javax.swing.JDialog {
      */
     private ClientCtr mySocket;
     private Long id;
-    private ArrayList<User> friends = new ArrayList<>();
+    private ArrayList<Friend> friends = new ArrayList<>();
     private DefaultTableModel table;
+    private Frame parent;
 
     public FriendFrm(java.awt.Frame parent, boolean modal, ClientCtr mySocket, Long id) {
         super(parent, modal);
         initComponents();
         this.mySocket = mySocket;
         this.id = id;
+        this.parent = parent;
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_GET_LIST_FRIEND, this));
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CONFIRM_FRIEND, this));
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_TRIGGER_STATUS, this));
+        this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_DELETE_FRIEND, this));
 
         getFriends();
     }
@@ -45,8 +46,8 @@ public class FriendFrm extends javax.swing.JDialog {
             String[][] values = new String[friends.size()][columns.length];
             for (int i = 0; i < friends.size(); i++) {
                 values[i][0] = i + 1 + "";
-                values[i][1] = friends.get(i).getUsername() + "";
-                values[i][2] = friends.get(i).getOnline() == 0 ? "OFFLINE" : "ONLINE";
+                values[i][1] = friends.get(i).getUser_2().getUsername() + "";
+                values[i][2] = friends.get(i).getUser_2().getOnline() == 0 ? "OFFLINE" : "ONLINE";
             }
             table = new DefaultTableModel(values, columns) {
                 @Override
@@ -95,6 +96,11 @@ public class FriendFrm extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
+        friendTbl.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                friendTblMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(friendTbl);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -120,6 +126,11 @@ public class FriendFrm extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void friendTblMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_friendTblMouseClicked
+        int index = friendTbl.getSelectedRow();
+        new DeleteFriendFrm(parent, rootPaneCheckingEnabled, mySocket, friends.get(index)).setVisible(true);
+    }//GEN-LAST:event_friendTblMouseClicked
 
     /**
      * @param args the command line arguments
@@ -166,32 +177,30 @@ public class FriendFrm extends javax.swing.JDialog {
     public void receivedDataProcessing(ObjectWrapper data) {
 //        reply get friends
         if (data.getPerformative() == ObjectWrapper.REPLY_GET_LIST_FRIEND) {
-            this.friends = (ArrayList<User>) data.getData();
+            this.friends = (ArrayList<Friend>) data.getData();
             mapToTable();
         }
 
 //        reply confirm friend
         if (data.getPerformative() == ObjectWrapper.REPLY_CONFIRM_FRIEND) {
-            System.out.println("HAVE A NEW FRIEND");
+            getFriends();
+            mapToTable();
+        }
+        
+        if (data.getPerformative() == ObjectWrapper.REPLY_CONFIRM_FRIEND) {
+            getFriends();
+            mapToTable();
+        }
+        
+        if (data.getPerformative() == ObjectWrapper.REPLY_DELETE_FRIEND) {
             getFriends();
             mapToTable();
         }
 
 //        reply trigger status (friend offline)
         if (data.getPerformative() == 16) {
-            if (this.friends.size() > 0) {
-                StatusDTO statusDTO = (StatusDTO) data.getData();
-                Long friendId = statusDTO.getUserId();
-                for (int i = 0; i < this.friends.size(); i++) {
-                    User currentUser = this.friends.get(i);
-                    if (currentUser.getId().equals(friendId)) {
-                        currentUser.setOnline(statusDTO.getStatus());
-                        this.friends.set(i, currentUser);
-                        break;
-                    }
-                }
-                mapToTable();
-            }
+            getFriends();
+            mapToTable();
         }
     }
 

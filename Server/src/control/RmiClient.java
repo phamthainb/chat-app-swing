@@ -9,6 +9,7 @@ import java.rmi.registry.Registry;
 
 import model.IPAddress;
 import model.User;
+import model.Friend;
 import impl.ChatInterface;
 import impl.FriendInterface;
 import impl.UserInterface;
@@ -83,7 +84,7 @@ public class RmiClient {
         }
     }
 
-    public ArrayList<User> remoteGetFriends(Long myId) {
+    public ArrayList<Friend> remoteGetFriends(Long myId) {
         try {
             return friendRo.getFriends(myId);
         } catch (RemoteException ex) {
@@ -92,16 +93,16 @@ public class RmiClient {
         }
     }
 
-    public Long remoteAddFriend(ArrayList<Long> ids) {
+    public Long remoteAddFriend(Friend friend) {
         try {
-            return friendRo.addFriend(ids);
+            return friendRo.addFriend(friend);
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return null;
         }
     }
 
-    public ArrayList<RequestDTO> remoteGetRequests(Long id) {
+    public ArrayList<Friend> remoteGetRequests(Long id) {
         try {
             return friendRo.getRequests(id);
         } catch (RemoteException ex) {
@@ -110,18 +111,27 @@ public class RmiClient {
         }
     }
 
-    public Long remoteConfirmFriend(RequestDTO requestDTO) {
+    public Long remoteConfirmFriend(Friend friend) {
         try {
-            return friendRo.confirmFriend(requestDTO);
+            return friendRo.confirmFriend(friend);
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return null;
         }
     }
 
-    public Long remoteDeclineFriend(Long friendId, Long toId) {
+    public Long remoteDeclineFriend(Friend friend) {
         try {
-            return friendRo.declineFriend(friendId, toId);
+            return friendRo.declineFriend(friend);
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    
+    public Long remoteDeleteFriend(Friend friend) {
+        try {
+            return friendRo.deleteFriend(friend);
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return null;
@@ -179,6 +189,15 @@ public class RmiClient {
     public ArrayList<User> remoteGetAllUsersInConversation(Long id) {
         try {
             return chatRo.getUserConverstation(id);
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public Friend remoteGetFriend(Friend friend) {
+        try {
+            return friendRo.getFriend(friend);
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return null;

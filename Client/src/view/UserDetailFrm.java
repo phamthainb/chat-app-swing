@@ -6,6 +6,7 @@ package view;
 
 import control.ClientCtr;
 import java.awt.Frame;
+import javax.swing.JOptionPane;
 import model.ObjectWrapper;
 import model.Friend;
 import model.User;
@@ -20,27 +21,25 @@ public class UserDetailFrm extends javax.swing.JDialog {
      * Creates new form UserDetail
      */
     private ClientCtr clientCtr;
-    private Long idUser1;
-    private Long idUser2;
+    private User user1;
+    private User user2;
     private Friend friend;
-    private boolean isRequestSending = false;
-    
-    public UserDetailFrm(Frame parent, boolean modal, Long idUser1, Long idUser2, ClientCtr clientCtr) {
+
+    public UserDetailFrm(Frame parent, boolean modal, User user1, User user2, ClientCtr clientCtr) {
         super(parent, modal);
         initComponents();
-        this.idUser1 = idUser1;
-        this.idUser2 = idUser2;
+        this.user1 = user1;
+        this.user2 = user2;
         this.clientCtr = clientCtr;
         this.clientCtr.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_GET_FRIEND_BY_USER, this));
+        this.clientCtr.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_ADD_FRIEND, this));
+        this.clientCtr.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CANCEL_FRIEND, this));
+        this.clientCtr.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CONFIRM_FRIEND, this));
         getFriend();
     }
-    
+
     private void getFriend() {
         Friend input = new Friend();
-        User user1 = new User();
-        User user2 = new User();
-        user1.setId(idUser1);
-        user2.setId(idUser2);
         input.setUser_1(user1);
         input.setUser_2(user2);
         this.clientCtr.sendData(new ObjectWrapper(ObjectWrapper.GET_FRIEND_BY_USER, input));
@@ -72,8 +71,18 @@ public class UserDetailFrm extends javax.swing.JDialog {
         });
 
         acceptBtn.setText("Accept");
+        acceptBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                acceptBtnActionPerformed(evt);
+            }
+        });
 
         cancelBtn.setText("CancelRequest");
+        cancelBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelBtnActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -110,22 +119,31 @@ public class UserDetailFrm extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
-        // TODO add your handling code here:
+        Friend input = new Friend();
+        input.setUser_1(user1);
+        input.setUser_2(user2);
+        input.setConfirmed(false);
+        clientCtr.sendData(new ObjectWrapper(ObjectWrapper.ADD_FRIEND, input));
     }//GEN-LAST:event_addBtnActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
+    private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
+        clientCtr.sendData(new ObjectWrapper(ObjectWrapper.CANCEL_FRIEND, this.friend));
+    }//GEN-LAST:event_cancelBtnActionPerformed
+
+    private void acceptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acceptBtnActionPerformed
+        this.friend.setConfirmed(true);
+        clientCtr.sendData(new ObjectWrapper(ObjectWrapper.CONFIRM_FRIEND, this.friend));
+    }//GEN-LAST:event_acceptBtnActionPerformed
+
     public void receivedDataProcessing(ObjectWrapper data) {
         resetUI();
         if (data.getPerformative() == ObjectWrapper.REPLY_GET_FRIEND_BY_USER) {
             this.friend = (Friend) data.getData();
+            System.out.println(this.friend.getId() + " " + this.friend.isConfirmed() + " " + this.friend.getUser_1().getUsername() + " " + this.friend.getUser_2().getUsername());
             // update button status
-            if (this.friend.getUser_1() != null) {
-                //the request is sent
-                this.isRequestSending = true;
+            if (this.friend.getId() != null) {
                 if (this.friend.isConfirmed() == false) {
-                    if (this.friend.getUser_1().getId().equals(idUser1)) {
+                    if (this.friend.getUser_1().getId().equals(this.user1.getId())) {
                         // if you are the one to send the request
                         // you can cancel it
                         cancelBtn.setEnabled(true);
@@ -137,23 +155,32 @@ public class UserDetailFrm extends javax.swing.JDialog {
             } else {
                 addBtn.setEnabled(true);
             }
-            
+
             // update username label
-            if(this.friend.getUser_2().getId().equals(idUser2)) {
+            if (this.friend.getUser_2().getId().equals(this.user2.getId())) {
                 username.setText(this.friend.getUser_2().getUsername());
-            }
-            else {
+            } else {
                 username.setText(this.friend.getUser_1().getUsername());
             }
         }
+
+        if (data.getPerformative() == ObjectWrapper.REPLY_ADD_FRIEND
+                || data.getPerformative() == ObjectWrapper.REPLY_CONFIRM_FRIEND
+                || data.getPerformative() == ObjectWrapper.REPLY_CANCEL_FRIEND) {
+            if (!(boolean) data.getData()) {
+                JOptionPane.showMessageDialog(rootPane, "Error occured");
+            } else {
+                this.dispose();
+            }
+        }
     }
-    
+
     public void resetUI() {
         addBtn.setEnabled(false);
         acceptBtn.setEnabled(false);
         cancelBtn.setEnabled(false);
     }
-    
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

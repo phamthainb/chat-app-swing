@@ -16,6 +16,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import model.IPAddress;
 import model.ObjectWrapper;
+import model.Friend;
 import model.User;
 import view.ServerMainFrm;
 import dto.RequestDTO;
@@ -148,8 +149,8 @@ public class ServerCtr {
             String mess = "";
             boolean booleanRes = false;
             ArrayList<User> users = new ArrayList<>();
-            ArrayList<RequestDTO> requests = new ArrayList<>();
-            ArrayList<User> friends = new ArrayList<>();
+            ArrayList<Friend> requests = new ArrayList<>();
+            ArrayList<Friend> friends = new ArrayList<>();
             ArrayList<Conversation> cons = new ArrayList<>();
             ArrayList<Message> messList = new ArrayList<>();
 
@@ -161,6 +162,8 @@ public class ServerCtr {
             Long fromId = null;
             Long toId = null;
             RequestDTO inputRequest = null;
+
+            Friend fr = null;
 
             try {
                 while (true) {
@@ -199,8 +202,8 @@ public class ServerCtr {
                                 break;
 
                             case ObjectWrapper.ADD_FRIEND:
-                                ids = (ArrayList<Long>) data.getData();
-                                Long userId2 = rmiClient.remoteAddFriend(ids);
+                                fr = (Friend) data.getData();
+                                Long userId2 = rmiClient.remoteAddFriend(fr);
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_ADD_FRIEND, !Objects.equals(null, userId2)));
 
                                 if (!Objects.equals(userId2, null)) {
@@ -213,13 +216,13 @@ public class ServerCtr {
                                 break;
 
                             case ObjectWrapper.GET_REQUESTS:
-                                requests = (ArrayList<RequestDTO>) rmiClient.remoteGetRequests((Long) data.getData());
+                                requests = (ArrayList<Friend>) rmiClient.remoteGetRequests((Long) data.getData());
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_GET_REQUESTS, requests));
                                 break;
 
                             case ObjectWrapper.CONFIRM_FRIEND:
 
-                                fromId = rmiClient.remoteConfirmFriend((RequestDTO) data.getData());
+                                fromId = rmiClient.remoteConfirmFriend((Friend) data.getData());
 
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CONFIRM_FRIEND, !Objects.equals(null, fromId)));
                                 if (!Objects.equals(null, fromId)) {
@@ -232,9 +235,9 @@ public class ServerCtr {
                                 break;
 
                             case ObjectWrapper.DECLINE_FRIEND:
-                                inputRequest = (RequestDTO) data.getData();
-                                toId = rmiClient.remoteDeclineFriend(inputRequest.getFriendId(), inputRequest.getToID());
-                                if(toId != null) {
+                                fr = (Friend) data.getData();
+                                toId = rmiClient.remoteDeclineFriend(fr);
+                                if (toId != null) {
                                     oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_DECLINE_FRIEND, true));
                                     for (ServerProcessing sp : myProcess) {
                                         if (Objects.equals(sp.getUser().getId(), toId)) {
@@ -244,10 +247,41 @@ public class ServerCtr {
                                 }
                                 break;
 
+                            case ObjectWrapper.CANCEL_FRIEND:
+                                fr = (Friend) data.getData();
+                                toId = rmiClient.remoteDeclineFriend(fr);
+                                if (toId != null) {
+                                    oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CANCEL_FRIEND, true));
+                                    for (ServerProcessing sp : myProcess) {
+                                        if (Objects.equals(sp.getUser().getId(), toId)) {
+                                            sp.sendData(new ObjectWrapper(ObjectWrapper.REPLY_CANCEL_FRIEND, true));
+                                        }
+                                    }
+                                }
+                                break;
+
+                            case ObjectWrapper.DELETE_FRIEND:
+                                fr = (Friend) data.getData();
+                                toId = rmiClient.remoteDeleteFriend(fr);
+                                if (toId != null) {
+                                    oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_DELETE_FRIEND, true));
+                                    for (ServerProcessing sp : myProcess) {
+                                        if (Objects.equals(sp.getUser().getId(), toId)) {
+                                            sp.sendData(new ObjectWrapper(ObjectWrapper.REPLY_DELETE_FRIEND, true));
+                                        }
+                                    }
+                                }
+                                break;
+
                             case ObjectWrapper.GET_LIST_FRIEND:
 
-                                friends = (ArrayList<User>) rmiClient.remoteGetFriends((Long) data.getData());
+                                friends = (ArrayList<Friend>) rmiClient.remoteGetFriends((Long) data.getData());
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_GET_LIST_FRIEND, friends));
+                                break;
+
+                            case ObjectWrapper.GET_FRIEND_BY_USER:
+                                fr = (Friend) rmiClient.remoteGetFriend((Friend) data.getData());
+                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_GET_FRIEND_BY_USER, fr));
                                 break;
 
                             case ObjectWrapper.TRIGGER_STATUS:
@@ -264,7 +298,7 @@ public class ServerCtr {
                             case ObjectWrapper.CHAT_GET_CONVERSTATION: {
 
                                 cons = rmiClient.remoteGetListConverstation((Long) data.getData());
-                                System.out.println("conversation "+ cons.size());
+                                System.out.println("conversation " + cons.size());
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_GET_CONVERSTATION, cons));
                                 break;
                             }
@@ -307,7 +341,7 @@ public class ServerCtr {
                             }
 
                             case ObjectWrapper.CHAT_GET_LIST_FRIEND: {
-                                users = rmiClient.remoteGetFriends((Long) data.getData());
+                                friends = rmiClient.remoteGetFriends((Long) data.getData());
 
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_GET_LIST_FRIEND, users));
                                 break;

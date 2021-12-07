@@ -20,6 +20,7 @@ import model.ObjectWrapper;
 import view.AddFriendFrm;
 import view.ChatConverstationFrm;
 import view.ChatCreateConvertstationFrm;
+import view.DeleteFriendFrm;
 import view.FriendFrm;
 import view.MainFrm;
 import view.RequestFrm;
@@ -101,6 +102,7 @@ public class ClientCtr {
             ChatCreateConvertstationFrm chatCreateConvertstationFrm;
             ChatConverstationFrm chatConverstationFrm;
             UserDetailFrm userDetailFrm;
+            DeleteFriendFrm deleteFriendFrm;
             try {
                 while (true) {
                     ObjectInputStream ois = new ObjectInputStream(mySocket.getInputStream());
@@ -139,21 +141,32 @@ public class ClientCtr {
                                         } else if (fto.getData() instanceof FriendFrm) {
                                             friendFrm = (FriendFrm) fto.getData();
                                             friendFrm.receivedDataProcessing(data);
-                                        } else if (fto.getData() instanceof AddFriendFrm) {
-                                            addFriendFrm = (AddFriendFrm) fto.getData();
-                                            addFriendFrm.receivedDataProcessing(data);
+                                        } else if (fto.getData() instanceof UserDetailFrm) {
+                                            userDetailFrm = (UserDetailFrm) fto.getData();
+                                            userDetailFrm.receivedDataProcessing(data);
                                         }
 
                                         break;
 
                                     case ObjectWrapper.REPLY_GET_REQUESTS:
                                     case ObjectWrapper.REPLY_DECLINE_FRIEND:
+                                    case ObjectWrapper.REPLY_CANCEL_FRIEND:
                                         if (fto.getData() instanceof RequestFrm) {
                                             requestFrm = (RequestFrm) fto.getData();
                                             requestFrm.receivedDataProcessing(data);
-                                        } else if (fto.getData() instanceof AddFriendFrm) {
-                                            addFriendFrm = (AddFriendFrm) fto.getData();
-                                            addFriendFrm.receivedDataProcessing(data);
+                                        } else if (fto.getData() instanceof UserDetailFrm) {
+                                            userDetailFrm = (UserDetailFrm) fto.getData();
+                                            userDetailFrm.receivedDataProcessing(data);
+                                        }
+                                        break;
+
+                                    case ObjectWrapper.REPLY_DELETE_FRIEND:
+                                        if (fto.getData() instanceof DeleteFriendFrm) {
+                                            deleteFriendFrm = (DeleteFriendFrm) fto.getData();
+                                            deleteFriendFrm.receivedDataProcessing(data);
+                                        } else if (fto.getData() instanceof FriendFrm) {
+                                            friendFrm = (FriendFrm) fto.getData();
+                                            friendFrm.receivedDataProcessing(data);
                                         }
                                         break;
 
@@ -162,9 +175,9 @@ public class ClientCtr {
                                             requestFrm = (RequestFrm) fto.getData();
                                             requestFrm.receivedDataProcessing(data);
 
-                                        } else if (fto.getData() instanceof AddFriendFrm) {
-                                            addFriendFrm = (AddFriendFrm) fto.getData();
-                                            addFriendFrm.receivedDataProcessing(data);
+                                        } else if (fto.getData() instanceof UserDetailFrm) {
+                                            userDetailFrm = (UserDetailFrm) fto.getData();
+                                            userDetailFrm.receivedDataProcessing(data);
                                         }
                                         break;
 
