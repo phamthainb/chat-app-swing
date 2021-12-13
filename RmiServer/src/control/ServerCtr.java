@@ -130,8 +130,8 @@ public class ServerCtr extends UnicastRemoteObject implements UserInterface, Fri
     }
 
     @Override
-    public void triggerStatus(User user) throws RemoteException {
-        userDao.triggerStatus(user);
+    public boolean triggerStatus(User user) throws RemoteException {
+        return userDao.triggerStatus(user);
     }
 
     @Override

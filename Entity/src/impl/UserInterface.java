@@ -21,5 +21,5 @@ public interface UserInterface extends Remote {
 
     public boolean signup(User user) throws RemoteException;
 
-    public void triggerStatus(User user) throws RemoteException;
+    public boolean triggerStatus(User user) throws RemoteException;
 }

@@ -249,7 +249,7 @@ public class ServerCtr {
 
                             case ObjectWrapper.CANCEL_FRIEND:
                                 fr = (Friend) data.getData();
-                                toId = rmiClient.remoteDeclineFriend(fr);
+                                toId = rmiClient.remoteCancelFriend(fr);
                                 if (toId != null) {
                                     oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CANCEL_FRIEND, true));
                                     for (ServerProcessing sp : myProcess) {

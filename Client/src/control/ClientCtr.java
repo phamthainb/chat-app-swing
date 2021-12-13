@@ -23,6 +23,7 @@ import view.ChatCreateConvertstationFrm;
 import view.DeleteFriendFrm;
 import view.FriendFrm;
 import view.MainFrm;
+import view.RequestDetailFrm;
 import view.RequestFrm;
 import view.SignupFrm;
 import view.UserDetailFrm;
@@ -103,6 +104,7 @@ public class ClientCtr {
             ChatConverstationFrm chatConverstationFrm;
             UserDetailFrm userDetailFrm;
             DeleteFriendFrm deleteFriendFrm;
+            RequestDetailFrm requestDetailFrm;
             try {
                 while (true) {
                     ObjectInputStream ois = new ObjectInputStream(mySocket.getInputStream());
@@ -145,6 +147,10 @@ public class ClientCtr {
                                             userDetailFrm = (UserDetailFrm) fto.getData();
                                             userDetailFrm.receivedDataProcessing(data);
                                         }
+                                        if (fto.getData() instanceof RequestDetailFrm) {
+                                            requestDetailFrm = (RequestDetailFrm) fto.getData();
+                                            requestDetailFrm.receivedDataProcessing(data);
+                                        }
 
                                         break;
 
@@ -154,9 +160,18 @@ public class ClientCtr {
                                         if (fto.getData() instanceof RequestFrm) {
                                             requestFrm = (RequestFrm) fto.getData();
                                             requestFrm.receivedDataProcessing(data);
-                                        } else if (fto.getData() instanceof UserDetailFrm) {
+                                        }
+                                        if (fto.getData() instanceof UserDetailFrm) {
                                             userDetailFrm = (UserDetailFrm) fto.getData();
                                             userDetailFrm.receivedDataProcessing(data);
+                                        }
+                                        if (fto.getData() instanceof RequestDetailFrm) {
+                                            requestDetailFrm = (RequestDetailFrm) fto.getData();
+                                            requestDetailFrm.receivedDataProcessing(data);
+                                        }
+                                        if (fto.getData() instanceof RequestFrm) {
+                                            requestFrm = (RequestFrm) fto.getData();
+                                            requestFrm.receivedDataProcessing(data);
                                         }
                                         break;
 
@@ -164,7 +179,8 @@ public class ClientCtr {
                                         if (fto.getData() instanceof DeleteFriendFrm) {
                                             deleteFriendFrm = (DeleteFriendFrm) fto.getData();
                                             deleteFriendFrm.receivedDataProcessing(data);
-                                        } else if (fto.getData() instanceof FriendFrm) {
+                                        }
+                                        if (fto.getData() instanceof FriendFrm) {
                                             friendFrm = (FriendFrm) fto.getData();
                                             friendFrm.receivedDataProcessing(data);
                                         }

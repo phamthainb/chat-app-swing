@@ -41,7 +41,7 @@ public class FriendFrm extends javax.swing.JDialog {
     }
 
     private void mapToTable() {
-        if (friends.size() >= 0) {
+        if (friends != null && friends.size() >= 0) {
             String columns[] = {"No.", "Username", "Status"};
             String[][] values = new String[friends.size()][columns.length];
             for (int i = 0; i < friends.size(); i++) {
@@ -121,7 +121,7 @@ public class FriendFrm extends javax.swing.JDialog {
                 .addComponent(jLabel1)
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(191, Short.MAX_VALUE))
+                .addContainerGap(43, Short.MAX_VALUE))
         );
 
         pack();
@@ -181,24 +181,10 @@ public class FriendFrm extends javax.swing.JDialog {
             mapToTable();
         }
 
-//        reply confirm friend
-        if (data.getPerformative() == ObjectWrapper.REPLY_CONFIRM_FRIEND) {
-            getFriends();
-            mapToTable();
-        }
-        
-        if (data.getPerformative() == ObjectWrapper.REPLY_CONFIRM_FRIEND) {
-            getFriends();
-            mapToTable();
-        }
-        
-        if (data.getPerformative() == ObjectWrapper.REPLY_DELETE_FRIEND) {
-            getFriends();
-            mapToTable();
-        }
-
-//        reply trigger status (friend offline)
-        if (data.getPerformative() == 16) {
+        if (data.getPerformative() == ObjectWrapper.REPLY_CONFIRM_FRIEND
+                || data.getPerformative() == ObjectWrapper.REPLY_TRIGGER_STATUS
+                || data.getPerformative() == ObjectWrapper.REPLY_DELETE_FRIEND
+                || data.getPerformative() == ObjectWrapper.REPLY_CONFIRM_FRIEND) {
             getFriends();
             mapToTable();
         }

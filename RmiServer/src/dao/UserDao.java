@@ -21,7 +21,7 @@ public class UserDao extends DAO {
 
     public User login(User user) {
         try {
-            Query query = session.createQuery("from User u where u.username= :username and password= :pwd");
+            Query query = session.createQuery("from User u where u.username = :username and u.password = :pwd");
             query.setParameter("username", user.getUsername());
             query.setParameter("pwd", user.getPassword());
             List<User> users = query.getResultList();
@@ -57,16 +57,19 @@ public class UserDao extends DAO {
         return null;
     }
 
-    public void triggerStatus(User user) {
-//        String sql = "update user set online=? where id=?";
-//        try {
-//            PreparedStatement ps = con.prepareStatement(sql);
-//            ps.setInt(1, status);
-//            ps.setLong(2, id);
-//            ps.executeUpdate();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+    public boolean triggerStatus(User user) {
+        try {
+            session.beginTransaction();
+            session.createQuery("update User u set u.online = :online where u.id = :id")
+                    .setParameter("online", user.getOnline())
+                    .setParameter("id", user.getId())
+                    .executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
 }

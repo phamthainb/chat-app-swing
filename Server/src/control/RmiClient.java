@@ -129,6 +129,15 @@ public class RmiClient {
         }
     }
     
+    public Long remoteCancelFriend(Friend friend) {
+        try {
+            return friendRo.cancelFriend(friend);
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    
     public Long remoteDeleteFriend(Friend friend) {
         try {
             return friendRo.deleteFriend(friend);
@@ -169,8 +178,7 @@ public class RmiClient {
 
     public boolean remoteTriggerStatus(User user) {
         try {
-            userRo.triggerStatus(user);
-            return true;
+            return userRo.triggerStatus(user);
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return false;

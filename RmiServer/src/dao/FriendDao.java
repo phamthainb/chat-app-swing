@@ -75,7 +75,7 @@ public class FriendDao extends DAO {
                     + "WHERE\n"
                     + "    NOT user.id = :id AND friend.confirmed = 1;")
                     .setParameter("id", id)
-                    .getResultList();
+                    .list();
             for (Object[] r : res) {
                 User user2 = new User();
                 Friend f = new Friend();
@@ -98,11 +98,12 @@ public class FriendDao extends DAO {
                 f.setId(friendId);
                 f.setConfirmed(confirmed);
                 f.setUser_2(user2);
-                
+
                 friends.add(f);
             }
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
         return friends;
     }
@@ -121,18 +122,62 @@ public class FriendDao extends DAO {
     }
 
     public ArrayList<Friend> getRequests(Long id) {
-        ArrayList<Friend> res = new ArrayList<>();
+        ArrayList<Friend> friends = new ArrayList<>();
         try {
             session.beginTransaction();
-            session.createQuery("update Friend fr set fr.confirmed = true where fr.id = :id")
+            session.clear();
+
+            List<Object[]> res = session.createNativeQuery("SELECT \n"
+                    + "    *\n"
+                    + "FROM\n"
+                    + "    user\n"
+                    + "        INNER JOIN\n"
+                    + "    (SELECT \n"
+                    + "        friend.id AS friendId,\n"
+                    + "            friend.id_user_1,\n"
+                    + "            friend.id_user_2,\n"
+                    + "            friend.confirmed\n"
+                    + "    FROM\n"
+                    + "        friend\n"
+                    + "    WHERE\n"
+                    + "        friend.id_user_2 = :id) AS friend ON (user.id = friend.id_user_1\n"
+                    + "        OR user.id = friend.id_user_2)\n"
+                    + "WHERE\n"
+                    + "    NOT user.id = :id AND friend.confirmed = 0;")
                     .setParameter("id", id)
-                    .executeUpdate();
+                    .getResultList();
+            for (Object[] r : res) {
+                User user1 = new User();
+                Friend f = new Friend();
+
+                int online = (int) r[3];
+                String username = (String) r[5];
+                boolean confirmed = (boolean) r[9];
+                Long friendId = Long.parseLong(String.valueOf(r[6]));
+                Long userId1 = Long.parseLong(String.valueOf(r[7]));
+                Long userId2 = Long.parseLong(String.valueOf(r[8]));
+
+                user1.setUsername(username);
+                user1.setOnline(online);
+
+                if (userId1.equals(id)) {
+                    user1.setId(userId2);
+                } else {
+                    user1.setId(userId1);
+                }
+                f.setId(friendId);
+                f.setConfirmed(confirmed);
+                f.setUser_1(user1);
+
+                friends.add(f);
+            }
             session.getTransaction().commit();
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-        return res;
+        return friends;
     }
 
     public Long confirmFriend(Friend fr) {

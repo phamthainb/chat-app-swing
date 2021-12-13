@@ -6,9 +6,11 @@ package view;
 
 import control.ClientCtr;
 import dto.RequestDTO;
+import java.awt.Frame;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import model.ObjectWrapper;
+import model.Friend;
 
 /**
  *
@@ -21,20 +23,20 @@ public class RequestFrm extends javax.swing.JDialog {
      */
     private ClientCtr mySocket;
     private Long id;
-    private int selectedIndex = -1;
-    private ArrayList<RequestDTO> requests = new ArrayList<>();
+    private ArrayList<Friend> requests = new ArrayList<>();
+    private Frame parent;
 
     public RequestFrm(java.awt.Frame parent, boolean modal, ClientCtr mySocket, Long id) {
         super(parent, modal);
         initComponents();
         this.mySocket = mySocket;
         this.id = id;
-        acceptBtn.setEnabled(false);
-        declineBtn.setEnabled(false);
+        this.parent = parent;
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CONFIRM_FRIEND, this));
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_GET_REQUESTS, this));
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_DECLINE_FRIEND, this));
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_ADD_FRIEND, this));
+        this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CANCEL_FRIEND, this));
 
         getRequests();
     }
@@ -56,8 +58,6 @@ public class RequestFrm extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         requestTbl = new javax.swing.JTable();
         usernameTxt = new javax.swing.JLabel();
-        acceptBtn = new javax.swing.JButton();
-        declineBtn = new javax.swing.JToggleButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -86,20 +86,6 @@ public class RequestFrm extends javax.swing.JDialog {
         });
         jScrollPane1.setViewportView(requestTbl);
 
-        acceptBtn.setText("Accept");
-        acceptBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                acceptBtnActionPerformed(evt);
-            }
-        });
-
-        declineBtn.setText("Decline");
-        declineBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                declineBtnActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -109,13 +95,10 @@ public class RequestFrm extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(81, 81, 81)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(usernameTxt)
-                            .addComponent(acceptBtn)
-                            .addComponent(declineBtn))))
-                .addContainerGap(109, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 363, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(8, 8, 8)
+                        .addComponent(usernameTxt)))
+                .addContainerGap(172, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -123,43 +106,19 @@ public class RequestFrm extends javax.swing.JDialog {
                 .addGap(21, 21, 21)
                 .addComponent(jLabel1)
                 .addGap(41, 41, 41)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(usernameTxt)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(acceptBtn)))
-                .addGap(18, 18, 18)
-                .addComponent(declineBtn)
-                .addContainerGap(246, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(usernameTxt)
+                .addContainerGap(264, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void acceptBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acceptBtnActionPerformed
-        if (selectedIndex != -1) {
-            mySocket.sendData(new ObjectWrapper(ObjectWrapper.CONFIRM_FRIEND, requests.get(this.selectedIndex)));
-        }
-    }//GEN-LAST:event_acceptBtnActionPerformed
-
     private void requestTblMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_requestTblMouseClicked
-        this.selectedIndex = requestTbl.getSelectedRow();
-        acceptBtn.setEnabled(true);
-        declineBtn.setEnabled(true);
-        if (this.selectedIndex != -1 && this.requests.size() > 0) {
-            usernameTxt.setText(requests.get(selectedIndex).getUsername());
-        }
+        int index = requestTbl.getSelectedRow();
+        new RequestDetailFrm(parent, rootPaneCheckingEnabled, requests.get(index), mySocket).setVisible(true);
     }//GEN-LAST:event_requestTblMouseClicked
-
-    private void declineBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_declineBtnActionPerformed
-        if (selectedIndex != -1) {
-            RequestDTO input = new RequestDTO();
-            input.setFriendId(requests.get(this.selectedIndex).getFriendId());
-            input.setToId(requests.get(this.selectedIndex).getFromId());
-            mySocket.sendData(new ObjectWrapper(ObjectWrapper.DECLINE_FRIEND, input));
-        }
-    }//GEN-LAST:event_declineBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -204,16 +163,14 @@ public class RequestFrm extends javax.swing.JDialog {
     }
 
     private void mapToTable() {
-        acceptBtn.setEnabled(false);
-        declineBtn.setEnabled(false);
         usernameTxt.setText("");
 
         if (requests.size() >= 0) {
             String columns[] = {"No.", "Username"};
             String[][] values = new String[requests.size()][columns.length];
             for (int i = 0; i < requests.size(); i++) {
-                values[i][0] = requests.get(i).getFriendId() + "";
-                values[i][1] = requests.get(i).getUsername() + "";
+                values[i][0] = requests.get(i).getUser_1().getId() + "";
+                values[i][1] = requests.get(i).getUser_1().getUsername() + "";
             }
             DefaultTableModel table = new DefaultTableModel(values, columns) {
                 @Override
@@ -226,19 +183,17 @@ public class RequestFrm extends javax.swing.JDialog {
     }
 
     public void receivedDataProcessing(ObjectWrapper data) {
-        // reply get list requests
+
         if (data.getPerformative() == ObjectWrapper.REPLY_GET_REQUESTS) {
-            this.requests = (ArrayList<RequestDTO>) data.getData();
+            this.requests = (ArrayList<Friend>) data.getData();
             mapToTable();
         }
-//        reply add friend
-        if (data.getPerformative() == ObjectWrapper.REPLY_ADD_FRIEND) {
-            getRequests();
-            mapToTable();
-        }
-//        reply confirm
-        if (data.getPerformative() == 8 || data.getPerformative() == 31) {
-//            String mess = (String) data.getData();
+
+        if (data.getPerformative() == ObjectWrapper.REPLY_ADD_FRIEND
+                || data.getPerformative() == ObjectWrapper.REPLY_CONFIRM_FRIEND
+                || data.getPerformative() == ObjectWrapper.REPLY_DECLINE_FRIEND
+                || data.getPerformative() == ObjectWrapper.REPLY_CANCEL_FRIEND) {
+            System.out.println("ADD | CONFIRM | CANCEL | DECLINE");
             getRequests();
             mapToTable();
         }
@@ -246,8 +201,6 @@ public class RequestFrm extends javax.swing.JDialog {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton acceptBtn;
-    private javax.swing.JToggleButton declineBtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable requestTbl;

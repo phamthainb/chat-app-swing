@@ -258,6 +258,7 @@ public class MainFrm extends javax.swing.JFrame {
         user.setUsername(username);
         user.setPassword(password);
         mySocket.sendData(new ObjectWrapper(ObjectWrapper.LOGIN_USER, user));
+        System.out.println("LOGIN");
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
