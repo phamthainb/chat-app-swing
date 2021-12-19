@@ -40,7 +40,7 @@ public class ChatDashboardFrm extends javax.swing.JFrame {
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_GET_CONVERSTATION, this));
         this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_CREATE_CONVERSTATION, this));
         // 
-        this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_CREATE_MESSAGE_DASHBOARD, this));
+        //this.mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_CREATE_MESSAGE_DASHBOARD, this));
 
         this.setTitle(user.getUsername());
         // call

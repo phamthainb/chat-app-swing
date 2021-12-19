@@ -153,6 +153,7 @@ public class ChatFrm extends javax.swing.JFrame {
         fileInput = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
+        jButton3 = new javax.swing.JButton();
 
         jMenu1.setText("jMenu1");
 
@@ -250,6 +251,13 @@ public class ChatFrm extends javax.swing.JFrame {
 
         jLabel3.setText("...");
 
+        jButton3.setText("refesh");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -275,9 +283,11 @@ public class ChatFrm extends javax.swing.JFrame {
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(201, 201, 201)
+                        .addGap(158, 158, 158)
                         .addComponent(jButton2)
-                        .addContainerGap(200, Short.MAX_VALUE))))
+                        .addGap(43, 43, 43)
+                        .addComponent(jButton3)
+                        .addContainerGap(144, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -289,7 +299,9 @@ public class ChatFrm extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton2))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton2)
+                            .addComponent(jButton3)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -381,6 +393,11 @@ public class ChatFrm extends javax.swing.JFrame {
 
         mySocket.sendData(new ObjectWrapper(ObjectWrapper.SEND_TYPING, typingDTO));
     }//GEN-LAST:event_jTextField1FocusLost
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        getListFile();
+    }//GEN-LAST:event_jButton3ActionPerformed
     private static void saveFiletoDisk(String fileOutput, byte[] bytes) throws IOException {
 
         try ( FileOutputStream fos = new FileOutputStream(fileOutput)) {
@@ -486,6 +503,7 @@ public class ChatFrm extends javax.swing.JFrame {
     private javax.swing.JButton fileInput;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
