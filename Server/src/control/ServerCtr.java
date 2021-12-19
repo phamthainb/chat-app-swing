@@ -21,6 +21,7 @@ import view.ServerMainFrm;
 import dto.RequestDTO;
 import dto.SendMessageDTO;
 import dto.StatusDTO;
+import dto.TypingDTO;
 import java.util.List;
 import java.util.Objects;
 import model.Conversation;
@@ -400,17 +401,17 @@ public class ServerCtr {
                                 }
                                 break;
 
-//                            case ObjectWrapper.SEND_TYPING:
-//                                boolean typinggg = (boolean) data.getData();
-//
-//                                for (ServerProcessing sp : myProcess) {
-//                                    if (sp.mySocket.getOutputStream() != mySocket.getOutputStream()) {
-//                                        sp.sendData(new ObjectWrapper(ObjectWrapper.BOARD_TYPING, typinggg));
-//                                    } else {
-//                                        oos.writeObject(new ObjectWrapper(ObjectWrapper.BOARD_TYPING, typinggg));
-//                                    }
-//                                }
-//                                break;
+                            case ObjectWrapper.SEND_TYPING:
+                                TypingDTO typinggg = (TypingDTO) data.getData();
+
+                                for (ServerProcessing sp : myProcess) {
+                                    if (sp.mySocket.getOutputStream() != mySocket.getOutputStream()) {
+                                        sp.sendData(new ObjectWrapper(ObjectWrapper.BOARD_TYPING, typinggg));
+                                    } else {
+                                        oos.writeObject(new ObjectWrapper(ObjectWrapper.BOARD_TYPING, typinggg));
+                                    }
+                                }
+                                break;
 
                         }
 

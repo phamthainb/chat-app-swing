@@ -363,23 +363,23 @@ public class ChatFrm extends javax.swing.JFrame {
 
     private void jTextField1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusGained
         // TODO add your handling code here:
-//        TypingDTO typingDTO = new TypingDTO();
-//        typingDTO.setUser(user);
-//        typingDTO.setConversation(conversation);
-//        typingDTO.setTyping(true);
+        TypingDTO typingDTO = new TypingDTO();
+        typingDTO.setUser(user);
+        typingDTO.setConversation(conversation);
+        typingDTO.setTyping(true);
 
-        mySocket.sendData(new ObjectWrapper(ObjectWrapper.GET_LIST_FILE, true));
+        mySocket.sendData(new ObjectWrapper(ObjectWrapper.SEND_TYPING, typingDTO));
 
     }//GEN-LAST:event_jTextField1FocusGained
 
     private void jTextField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusLost
         // TODO add your handling code here:
-//        TypingDTO typingDTO = new TypingDTO();
-//        typingDTO.setUser(user);
-//        typingDTO.setConversation(conversation);
-//        typingDTO.setTyping(false);
+        TypingDTO typingDTO = new TypingDTO();
+        typingDTO.setUser(user);
+        typingDTO.setConversation(conversation);
+        typingDTO.setTyping(false);
 
-        mySocket.sendData(new ObjectWrapper(ObjectWrapper.GET_LIST_FILE, false));
+        mySocket.sendData(new ObjectWrapper(ObjectWrapper.SEND_TYPING, typingDTO));
     }//GEN-LAST:event_jTextField1FocusLost
     private static void saveFiletoDisk(String fileOutput, byte[] bytes) throws IOException {
 
@@ -423,10 +423,10 @@ public class ChatFrm extends javax.swing.JFrame {
     }
 
     public void boardTyping(ObjectWrapper data) {
-        boolean res = (boolean) data.getData();
+        TypingDTO res = (TypingDTO) data.getData();
         System.out.println("----typing");
-        if (res) {
-            jLabel3.setText("Some one is typing...");
+        if (res.isTyping()) {
+            jLabel3.setText(res.getUser().getUsername() + " is typing...");
         } else {
             jLabel3.setText("");
         }
