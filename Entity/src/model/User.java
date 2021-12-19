@@ -18,12 +18,14 @@ import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "user")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class User extends BaseEntity {
 
     @Column(name = "username")
@@ -34,12 +36,6 @@ public class User extends BaseEntity {
 
     @Column(name = "online")
     private int online = 0; // last time online
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "conversation_user",
-            joinColumns = {
-                @JoinColumn(name = "id_user")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "id_conversation")})
-    private Set<Conversation> conversation = new HashSet<>();
+    
+    
 }

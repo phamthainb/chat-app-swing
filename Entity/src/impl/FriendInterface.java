@@ -32,4 +32,7 @@ public interface FriendInterface extends Remote {
     public Long deleteFriend(Friend friend) throws RemoteException;
 
     public Friend getFriend(Friend friend) throws RemoteException;
+    
+    // chat 
+    public ArrayList<Friend> getChatFriend(User u) throws RemoteException;
 }

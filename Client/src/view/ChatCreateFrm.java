@@ -7,28 +7,27 @@ package view;
 import control.ClientCtr;
 import java.awt.Frame;
 import java.util.ArrayList;
-import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
-import model.Conversation;
+import model.Friend;
 import model.ObjectWrapper;
 import model.User;
 
 /**
  *
- * @author hp
+ * @author phamthainb
  */
-public class ChatCreateConvertstationFrm extends javax.swing.JDialog {
+public class ChatCreateFrm extends javax.swing.JDialog {
 
     /**
-     * Creates new form ChatCreateConvertstationFrm
+     * Creates new form ChatCreateFrm
      */
     private ClientCtr mySocket;
     private User user;
     Frame parent;
-    private ArrayList<User> listFriend = new ArrayList<>();
+    private ArrayList<Friend> listFriend = new ArrayList<>();
 
-    public ChatCreateConvertstationFrm(java.awt.Frame parent, boolean modal, ClientCtr mySocket, User user) {
+    public ChatCreateFrm(java.awt.Frame parent, boolean modal, ClientCtr mySocket, User user) {
         super(parent, modal);
         initComponents();
         this.parent = parent;
@@ -43,17 +42,21 @@ public class ChatCreateConvertstationFrm extends javax.swing.JDialog {
         // call list friend
         getFriends();
 
+        this.setTitle(user.getUsername());
     }
 
     void getFriends() {
-        this.mySocket.sendData(new ObjectWrapper(ObjectWrapper.CHAT_GET_LIST_FRIEND, this.user.getId()));
+        //System.out.println("my id " + this.user.getId());
+        this.mySocket.sendData(new ObjectWrapper(ObjectWrapper.CHAT_GET_LIST_FRIEND, this.user));
     }
 
     public void receivedDataProcessing(ObjectWrapper data) {
         if (data.getPerformative() == ObjectWrapper.REPLY_TRIGGER_STATUS) {
             getFriends();
-        } else {
-            ArrayList<User> listFriendData = (ArrayList<User>) data.getData();
+        }
+        if (data.getPerformative() == ObjectWrapper.REPLY_CHAT_GET_LIST_FRIEND) {
+            ArrayList<Friend> listFriendData = (ArrayList<Friend>) data.getData();
+            //System.out.println("123 :" + listFriendData.size());
             this.listFriend = listFriendData;
             jLabel1.setText("Create converstaion (" + user.getUsername() + ")");
             mapListFriend();
@@ -74,9 +77,16 @@ public class ChatCreateConvertstationFrm extends javax.swing.JDialog {
         jList1.setModel(model);
         model.removeAllElements();
 
-        for (User user1 : listFriend) {
-            String status = user1.getOnline() == 1 ? "online" : "offline";
-            model.addElement(user1.getUsername() + "-" + status);
+        for (Friend friend1 : listFriend) {
+            User k;
+            if (friend1.getUser_1().getId().equals(this.user.getId())) {
+                k = friend1.getUser_2();
+            } else {
+                k = friend1.getUser_1();
+            }
+            //System.out.println("KKK "+ k.toString());
+            String status = k.getOnline() == 1 ? "online" : "offline";
+            model.addElement(k.getUsername() + " - " + status);
         }
     }
 
@@ -159,10 +169,19 @@ public class ChatCreateConvertstationFrm extends javax.swing.JDialog {
 
         if (listPicked.length >= 1) {
             ArrayList<User> listU = new ArrayList<>();
-            listU.add(user);
+            listU.add(this.user);
+            
             for (int index : listPicked) {
-                listU.add(listFriend.get(index));
+                User k;
+                if (listFriend.get(index).getUser_1().getId().equals(this.user.getId())) {
+                    k = listFriend.get(index).getUser_2();
+                } else {
+                    k = listFriend.get(index).getUser_1();
+                }
+                listU.add(k);
             }
+            
+            //System.out.println("Create new converstation done");
             mySocket.sendData(new ObjectWrapper(ObjectWrapper.CHAT_CREATE_CONVERSTATION, listU));
         } else {
             JOptionPane.showMessageDialog(rootPane, "Pick at least 1 User for create an single or group converstation.");
@@ -186,21 +205,35 @@ public class ChatCreateConvertstationFrm extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ChatCreateConvertstationFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ChatCreateFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ChatCreateConvertstationFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ChatCreateFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ChatCreateConvertstationFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ChatCreateFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ChatCreateConvertstationFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(ChatCreateFrm.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                ChatCreateConvertstationFrm dialog = new ChatCreateConvertstationFrm(new javax.swing.JFrame(), true, null, null);
+                ChatCreateFrm dialog = new ChatCreateFrm(new javax.swing.JFrame(), true, null, null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {

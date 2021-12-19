@@ -4,25 +4,21 @@
  */
 package dao;
 
-import dto.SendMessageDTO;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import static dao.DAO.session;
 import java.util.ArrayList;
-import java.util.List;
-import model.Conversation;
+import model.FileMessage;
 import model.Message;
-import model.User;
 
 /**
  *
  * @author phamthainb
  */
-public class MessageDAO extends DAO {
+public class FileDao extends DAO {
 
-    public ArrayList<Message> getMessageConverstation(Long converstation_id) {
-        ArrayList<Message> res = new ArrayList<>();
+    public ArrayList<FileMessage> getFileMessage(Long converstation_id) {
+        ArrayList<FileMessage> res = new ArrayList<>();
         try {
-            res = (ArrayList<Message>) session.createQuery("select m from Message m WHERE m.conversation.id = :cid")
+            res = (ArrayList<FileMessage>) session.createQuery("select m from FileMessage m WHERE m.conversation.id = :cid")
                     .setParameter("cid", converstation_id)
                     .list();
         } catch (Exception e) {
@@ -30,7 +26,7 @@ public class MessageDAO extends DAO {
         return res;
     }
 
-    public boolean sendMessage(Message m) {
+    public boolean sendFileMessage(FileMessage m) {
         try {
             session.beginTransaction();
             session.clear();

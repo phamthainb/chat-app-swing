@@ -18,9 +18,11 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  *
@@ -31,16 +33,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Conversation extends BaseEntity {
 
     @Column
     private String name;
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "conversation_user",
-            joinColumns = {
-                @JoinColumn(name = "id_conversation")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "id_user")})
-    private Set<User> users = new HashSet<>();
+    
+    @Transient
+    private List<User> users = new ArrayList<>();
 }

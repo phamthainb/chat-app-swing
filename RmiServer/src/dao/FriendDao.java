@@ -221,4 +221,12 @@ public class FriendDao extends DAO {
         }
         return fr.getUser_2().getId();
     }
+
+    // chat 
+    public ArrayList<Friend> getChatFriend(User u) {
+        return (ArrayList<Friend>) session.createQuery("select f from Friend f where f.user_1.id = :k or f.user_2.id = :m")
+                .setParameter("k", u.getId())
+                .setParameter("m", u.getId())
+                .list();
+    }
 }

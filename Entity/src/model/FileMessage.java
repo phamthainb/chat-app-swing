@@ -4,11 +4,11 @@
  */
 package model;
 
-import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -21,15 +21,19 @@ import lombok.ToString;
  * @author phamthainb
  */
 @Entity
-@Table(name = "message")
+@Table(name = "file_message")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Message extends BaseEntity {
+public class FileMessage extends BaseEntity {
 
-    @Column(name = "content")
-    private String content;
+    @Column(name = "base64")
+    @Lob
+    private String base64;
+
+    @Column(name = "name")
+    private String name;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_user", referencedColumnName = "id")
@@ -38,5 +42,4 @@ public class Message extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id_conversation", referencedColumnName = "id")
     private Conversation conversation;
-
 }

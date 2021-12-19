@@ -11,11 +11,14 @@ import model.IPAddress;
 import model.User;
 import model.Friend;
 import impl.ChatInterface;
+import impl.FileMessageInterface;
 import impl.FriendInterface;
 import impl.UserInterface;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
 import model.Conversation;
+import model.FileMessage;
 import model.Message;
 import view.ServerMainFrm;
 
@@ -25,6 +28,7 @@ public class RmiClient {
     private UserInterface userRo;
     private FriendInterface friendRo;
     private ChatInterface chatRo;
+    private FileMessageInterface fileMessageRo;
 
     private IPAddress serverAddress = new IPAddress("localhost", 7611);
     private String rmiService = "rmiServer";
@@ -48,6 +52,7 @@ public class RmiClient {
             userRo = (UserInterface) (registry.lookup(rmiService));
             friendRo = (FriendInterface) (registry.lookup(rmiService));
             chatRo = (ChatInterface) (registry.lookup(rmiService));
+            fileMessageRo = (FileMessageInterface) (registry.lookup(rmiService));
 
             view.showMessage("Found the remote objects at the host: " + serverAddress.getHost() + ", port: " + serverAddress.getPort());
         } catch (Exception e) {
@@ -128,7 +133,7 @@ public class RmiClient {
             return null;
         }
     }
-    
+
     public Long remoteCancelFriend(Friend friend) {
         try {
             return friendRo.cancelFriend(friend);
@@ -137,7 +142,7 @@ public class RmiClient {
             return null;
         }
     }
-    
+
     public Long remoteDeleteFriend(Friend friend) {
         try {
             return friendRo.deleteFriend(friend);
@@ -148,8 +153,8 @@ public class RmiClient {
     }
 
     // chat
-    public ArrayList<Conversation> remoteGetListConverstation(Long id) {
-        System.out.println("REMOTE_GETLIST 1: " + id);
+    public List<Conversation> remoteGetListConverstation(Long id) {
+        //System.out.println("REMOTE_GETLIST 1: " + id);
         try {
             return chatRo.getConverstation(id);
         } catch (RemoteException ex) {
@@ -158,7 +163,7 @@ public class RmiClient {
         }
     }
 
-    public boolean remoteCreateConverstation(ArrayList<User> users) {
+    public boolean remoteCreateConverstation(List<User> users) {
         try {
             return chatRo.createConverstation(users);
         } catch (RemoteException ex) {
@@ -185,7 +190,7 @@ public class RmiClient {
         }
     }
 
-    public boolean remoteSendMessage(SendMessageDTO mess) {
+    public boolean remoteSendMessage(Message mess) {
         try {
             return chatRo.sendMessage(mess);
         } catch (RemoteException ex) {
@@ -206,6 +211,34 @@ public class RmiClient {
     public Friend remoteGetFriend(Friend friend) {
         try {
             return friendRo.getFriend(friend);
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public ArrayList<Friend> remoteGetChatFriends(User u) {
+        try {
+            return friendRo.getChatFriend(u);
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+    // file 
+
+    public Boolean remoteSaveFile(FileMessage f) {
+        try {
+            return fileMessageRo.saveFile(f);
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public ArrayList<FileMessage> remoteGetListFile(Conversation c) {
+        try {
+            return fileMessageRo.getListFile(c);
         } catch (RemoteException ex) {
             ex.printStackTrace();
             return null;

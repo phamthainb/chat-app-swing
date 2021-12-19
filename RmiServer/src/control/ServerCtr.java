@@ -25,14 +25,18 @@ import impl.ChatInterface;
 import model.Conversation;
 import model.Message;
 import dao.ConversartionDAO;
+import dao.FileDao;
 import dao.MessageDAO;
+import impl.FileMessageInterface;
+import java.util.List;
+import model.FileMessage;
 import model.Friend;
 
 /**
  *
  * @author son
  */
-public class ServerCtr extends UnicastRemoteObject implements UserInterface, FriendInterface, ChatInterface {
+public class ServerCtr extends UnicastRemoteObject implements UserInterface, FriendInterface, ChatInterface, FileMessageInterface {
 
     private IPAddress myAddress = new IPAddress("localhost", 7611);
     private Registry registry;
@@ -41,6 +45,7 @@ public class ServerCtr extends UnicastRemoteObject implements UserInterface, Fri
 
     private ConversartionDAO cdao = new ConversartionDAO();
     private MessageDAO mdao = new MessageDAO();
+    private FileDao fileDao = new FileDao();
 
     private UserDao userDao = new UserDao();
     private FriendDao friendDao = new FriendDao();
@@ -135,7 +140,7 @@ public class ServerCtr extends UnicastRemoteObject implements UserInterface, Fri
     }
 
     @Override
-    public ArrayList<Conversation> getConverstation(Long id) throws RemoteException {
+    public List<Conversation> getConverstation(Long id) throws RemoteException {
         return cdao.getAllConverstation(id);
     }
 
@@ -145,7 +150,7 @@ public class ServerCtr extends UnicastRemoteObject implements UserInterface, Fri
     }
 
     @Override
-    public boolean createConverstation(ArrayList<User> list) throws RemoteException {
+    public boolean createConverstation(List<User> list) throws RemoteException {
         return cdao.createConverstation(list);
     }
 
@@ -155,8 +160,8 @@ public class ServerCtr extends UnicastRemoteObject implements UserInterface, Fri
     }
 
     @Override
-    public boolean sendMessage(SendMessageDTO sendMessageDTO) throws RemoteException {
-        return mdao.sendMessage(sendMessageDTO);
+    public boolean sendMessage(Message m) throws RemoteException {
+        return mdao.sendMessage(m);
     }
 
     @Override
@@ -172,5 +177,21 @@ public class ServerCtr extends UnicastRemoteObject implements UserInterface, Fri
     @Override
     public Long deleteFriend(Friend friend) throws RemoteException {
         return friendDao.cancelFriend(friend);
+    }
+
+    @Override
+    public ArrayList<Friend> getChatFriend(User u) throws RemoteException {
+        return friendDao.getChatFriend(u);
+    }
+
+    // file handle
+    @Override
+    public boolean saveFile(FileMessage f) throws RemoteException {
+        return fileDao.sendFileMessage(f);
+    }
+
+    @Override
+    public ArrayList<FileMessage> getListFile(Conversation c) throws RemoteException {
+        return fileDao.getFileMessage(c.getId());
     }
 }

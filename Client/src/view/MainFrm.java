@@ -8,7 +8,12 @@ package view;
 import control.ClientCtr;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Objects;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import model.Conversation;
+import model.Message;
 import model.ObjectWrapper;
 import model.User;
 
@@ -29,7 +34,7 @@ public class MainFrm extends javax.swing.JFrame {
         init();
 
         sidebar.setVisible(false);
-
+        
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 if (mySocket != null) {
@@ -277,10 +282,18 @@ public class MainFrm extends javax.swing.JFrame {
         new FriendFrm(this, rootPaneCheckingEnabled, mySocket, this.info.getId()).setVisible(true);
     }//GEN-LAST:event_jButton5ActionPerformed
 
+    public void openNewChat(Conversation c) {
+        JFrame f1 = new ChatFrm(mySocket, info, c);
+        Thread t1 = new Thread(new MulJFrame(f1));
+        t1.start();
+    }
+
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
-        new ChatConverstationFrm(this, rootPaneCheckingEnabled, mySocket, this.info).setVisible(true);
-
+        //new ChatDashboardFrm(mySocket, this.info).setVisible(true);
+        JFrame f1 = new ChatDashboardFrm(mySocket, info);
+        Thread t1 = new Thread(new MulJFrame(f1));
+        t1.start();
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
@@ -298,6 +311,7 @@ public class MainFrm extends javax.swing.JFrame {
             resetClient();
         } else {
             mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_LOGIN_USER, this));
+            mySocket.getActiveFunction().add(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_CREATE_MESSAGE_DASHBOARD, this));
         }
     }
 
@@ -322,6 +336,57 @@ public class MainFrm extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Login fail!");
             }
         }
+    }
+
+    public ArrayList<Conversation> getListOpen() {
+        return this.mySocket.getOpenConversation();
+    }
+
+    public ArrayList<Conversation> updateListOpen(ArrayList<Conversation> l) {
+        return this.mySocket.updateOpenConversation(l);
+    }
+
+    // check if converstaion not open => open new
+    public void receveNewMesseage(ObjectWrapper data) {
+        System.out.println("receve new mess in dashboard");
+        ArrayList<Message> mess = (ArrayList<Message>) data.getData();
+
+        if (mess.size() > 0) {
+            Conversation c = mess.get(0).getConversation();
+            // check chat is opened
+            boolean check = true;
+
+            ArrayList<Conversation> listOpenConverstation = getListOpen();
+
+            for (Conversation copen : listOpenConverstation) {
+                if (Objects.equals(c.getId(), copen.getId())) {
+                    check = false;
+                }
+            }
+
+            if (check) {
+                openNewChatFrmSync(c);
+            }
+        }
+
+    }
+
+    void openNewChatFrmSync(Conversation conversation) {
+        JFrame newChat = new ChatFrm(mySocket, this.info, conversation);
+        newChat.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                ArrayList<Conversation> listOpenConverstation = getListOpen();
+                listOpenConverstation.remove(conversation);
+                updateListOpen(listOpenConverstation);
+            }
+        });
+        Thread t = new Thread(new MulJFrame(newChat));
+        t.start();
+        // sync
+        ArrayList<Conversation> listOpenConverstation = getListOpen();
+        listOpenConverstation.add(conversation);
+        updateListOpen(listOpenConverstation);
     }
 
     /**

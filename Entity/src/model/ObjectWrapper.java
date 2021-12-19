@@ -47,22 +47,36 @@ public class ObjectWrapper implements Serializable {
 
     public static final int CHAT_GET_MESSAGE = 28;
     public static final int REPLY_CHAT_GET_MESSAGE = 29;
-    
+
     public static final int DECLINE_FRIEND = 30;
     public static final int REPLY_DECLINE_FRIEND = 31;
-    
+
     public static final int CHAT_GET_LIST_FRIEND = 32;
     public static final int REPLY_CHAT_GET_LIST_FRIEND = 33;
-    
+
     public static final int GET_FRIEND_BY_USER = 34;
     public static final int REPLY_GET_FRIEND_BY_USER = 35;
 
     public static final int CANCEL_FRIEND = 36;
     public static final int REPLY_CANCEL_FRIEND = 37;
-    
+
     public static final int DELETE_FRIEND = 38;
     public static final int REPLY_DELETE_FRIEND = 39;
-    
+
+    public static final int CHAT_CREATE_MESSAGE_DASHBOARD = 50;
+    public static final int REPLY_CHAT_CREATE_MESSAGE_DASHBOARD = 51;
+
+    // file handle
+    public static final int SEND_FILE = 60;
+    public static final int REPLY_SEND_FILE = 61;
+
+    public static final int GET_LIST_FILE = 62;
+    public static final int REPLY_GET_LIST_FILE = 63;
+
+    // check who is typing
+    public static final int SEND_TYPING = 70;
+    public static final int BOARD_TYPING = 71;
+
     private int performative;
     private Object data;
 

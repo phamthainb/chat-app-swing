@@ -13,14 +13,15 @@ import model.User;
 
 /**
  *
- * @author phamthainb
+ * @author sonht
  */
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SendMessageDTO implements Serializable{
+public class TypingDTO implements Serializable {
 
     private User user;
-    private Conversation converstation;
-    private String content;
+    private Conversation conversation;
+    private boolean typing;
 }

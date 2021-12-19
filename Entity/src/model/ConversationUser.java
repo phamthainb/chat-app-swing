@@ -4,11 +4,13 @@
  */
 package model;
 
-import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -21,22 +23,17 @@ import lombok.ToString;
  * @author phamthainb
  */
 @Entity
-@Table(name = "message")
+@Table(name = "conversation_user")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Message extends BaseEntity {
-
-    @Column(name = "content")
-    private String content;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id_user", referencedColumnName = "id")
-    private User user;
-
-    @OneToOne(cascade = CascadeType.ALL)
+public class ConversationUser extends BaseEntity{
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "id_conversation", referencedColumnName = "id")
-    private Conversation conversation;
-
+    private Conversation conversation;  // 
+    
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_user", referencedColumnName = "id")
+    private User user;  // 
 }

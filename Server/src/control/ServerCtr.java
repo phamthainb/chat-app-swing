@@ -5,7 +5,6 @@
  */
 package control;
 
-import dto.AddFriendDTO;
 import java.io.EOFException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,8 +21,10 @@ import view.ServerMainFrm;
 import dto.RequestDTO;
 import dto.SendMessageDTO;
 import dto.StatusDTO;
+import java.util.List;
 import java.util.Objects;
 import model.Conversation;
+import model.FileMessage;
 import model.Message;
 
 public class ServerCtr {
@@ -221,9 +222,7 @@ public class ServerCtr {
                                 break;
 
                             case ObjectWrapper.CONFIRM_FRIEND:
-
                                 fromId = rmiClient.remoteConfirmFriend((Friend) data.getData());
-
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CONFIRM_FRIEND, !Objects.equals(null, fromId)));
                                 if (!Objects.equals(null, fromId)) {
                                     for (ServerProcessing sp : myProcess) {
@@ -274,7 +273,6 @@ public class ServerCtr {
                                 break;
 
                             case ObjectWrapper.GET_LIST_FRIEND:
-
                                 friends = (ArrayList<Friend>) rmiClient.remoteGetFriends((Long) data.getData());
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_GET_LIST_FRIEND, friends));
                                 break;
@@ -285,7 +283,6 @@ public class ServerCtr {
                                 break;
 
                             case ObjectWrapper.TRIGGER_STATUS:
-
                                 inputUser = (User) data.getData();
                                 booleanRes = rmiClient.remoteTriggerStatus(inputUser);
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_TRIGGER_STATUS, booleanRes));
@@ -295,29 +292,29 @@ public class ServerCtr {
                                 break;
 
                             // CHAT Key
-                            case ObjectWrapper.CHAT_GET_CONVERSTATION: {
-
-                                cons = rmiClient.remoteGetListConverstation((Long) data.getData());
-                                System.out.println("conversation " + cons.size());
-                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_GET_CONVERSTATION, cons));
+                            case ObjectWrapper.CHAT_GET_CONVERSTATION:
+                                List<Conversation> listCon;
+                                listCon = rmiClient.remoteGetListConverstation((Long) data.getData());
+                                System.out.println("conversation " + listCon.size());
+                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_GET_CONVERSTATION, listCon));
                                 break;
-                            }
 
-                            case ObjectWrapper.CHAT_GET_MESSAGE: {
+                            case ObjectWrapper.CHAT_GET_MESSAGE:
                                 messList = rmiClient.remoteGetListMessage((Long) data.getData());
 
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_GET_MESSAGE, messList));
                                 break;
-                            }
 
-                            case ObjectWrapper.CHAT_CREATE_MESSAGE: {
-                                booleanRes = rmiClient.remoteSendMessage((SendMessageDTO) data.getData());
-                                sendMessageDTO = (SendMessageDTO) data.getData();
+                            case ObjectWrapper.CHAT_CREATE_MESSAGE:
+                                // save to db
+                                booleanRes = rmiClient.remoteSendMessage((Message) data.getData());
+                                Message m = (Message) data.getData();
 
                                 ArrayList<Message> messages = new ArrayList<>();
                                 if (booleanRes) {
-                                    messages = rmiClient.remoteGetListMessage((sendMessageDTO.getConverstation_id()));
-                                    ArrayList<User> listUser = rmiClient.remoteGetAllUsersInConversation(sendMessageDTO.getConverstation_id());
+                                    messages = rmiClient.remoteGetListMessage((m.getConversation().getId()));
+                                    ArrayList<User> listUser = rmiClient.remoteGetAllUsersInConversation(m.getConversation().getId());
+
                                     // loop all process connected
                                     for (ServerProcessing sp : myProcess) {
                                         // is other process
@@ -326,6 +323,12 @@ public class ServerCtr {
                                             for (User userMember : listUser) {
                                                 if (Objects.equals(userMember.getId(), sp.user.getId())) {
                                                     sp.sendData(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_GET_MESSAGE, messages));
+                                                }
+                                            }
+                                            // push open chatFrm
+                                            for (User userMember : listUser) {
+                                                if (Objects.equals(userMember.getId(), sp.user.getId())) {
+                                                    sp.sendData(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_CREATE_MESSAGE_DASHBOARD, messages));
                                                 }
                                             }
                                         } else {
@@ -338,32 +341,77 @@ public class ServerCtr {
                                 }
 
                                 break;
-                            }
 
-                            case ObjectWrapper.CHAT_GET_LIST_FRIEND: {
-                                friends = rmiClient.remoteGetFriends((Long) data.getData());
-
-                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_GET_LIST_FRIEND, users));
+                            case ObjectWrapper.CHAT_GET_LIST_FRIEND:
+                                friends = rmiClient.remoteGetChatFriends((User) data.getData());
+                                System.out.println("------get list friend done " + friends.size());
+                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_GET_LIST_FRIEND, friends));
                                 break;
-                            }
 
-                            case ObjectWrapper.CHAT_CREATE_CONVERSTATION: {
-                                users = (ArrayList<User>) data.getData();
-                                ids.clear();
-                                for (User u : users) {
-                                    ids.add(u.getId());
-                                }
-                                booleanRes = (boolean) rmiClient.remoteCreateConverstation(users);
+                            case ObjectWrapper.CHAT_CREATE_CONVERSTATION:
+                                List<User> us;
+                                us = (List<User>) data.getData();
+                                booleanRes = (boolean) rmiClient.remoteCreateConverstation(us);
+
                                 if (booleanRes) {
+                                    ids.clear();
+                                    for (User u : us) {
+                                        ids.add(u.getId());
+                                    }
+
                                     for (ServerProcessing sp : myProcess) {
+                                        // sent to other
                                         if (!sp.getUser().getId().equals(this.user.getId()) && ids.indexOf(sp.getUser().getId()) != -1) {
                                             sp.sendData(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_CREATE_CONVERSTATION, booleanRes));
                                         }
                                     }
                                 }
+
                                 oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_CHAT_CREATE_CONVERSTATION, booleanRes));
                                 break;
-                            }
+
+                            // FILE ----
+                            case ObjectWrapper.SEND_FILE:
+                                FileMessage f = (FileMessage) data.getData();
+                                System.out.println("file >>" + f.getName());
+                                booleanRes = (boolean) rmiClient.remoteSaveFile(f);
+
+                                oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_SEND_FILE, booleanRes));
+                                break;
+
+                            case ObjectWrapper.GET_LIST_FILE:
+                                Conversation c = (Conversation) data.getData();
+                                ArrayList<FileMessage> fileMessages;
+                                fileMessages = rmiClient.remoteGetListFile(c);
+
+                                ArrayList<User> listUserCC = rmiClient.remoteGetAllUsersInConversation(c.getId());
+
+                                for (ServerProcessing sp : myProcess) {
+                                    if (sp.mySocket.getOutputStream() != mySocket.getOutputStream()) {
+                                        for (User userMember : listUserCC) {
+                                            if (Objects.equals(userMember.getId(), sp.user.getId())) {
+                                                sp.sendData(new ObjectWrapper(ObjectWrapper.REPLY_GET_LIST_FILE, fileMessages));
+                                            }
+                                        }
+
+                                    } else {
+                                        oos.writeObject(new ObjectWrapper(ObjectWrapper.REPLY_GET_LIST_FILE, fileMessages));
+                                    }
+                                }
+                                break;
+
+//                            case ObjectWrapper.SEND_TYPING:
+//                                boolean typinggg = (boolean) data.getData();
+//
+//                                for (ServerProcessing sp : myProcess) {
+//                                    if (sp.mySocket.getOutputStream() != mySocket.getOutputStream()) {
+//                                        sp.sendData(new ObjectWrapper(ObjectWrapper.BOARD_TYPING, typinggg));
+//                                    } else {
+//                                        oos.writeObject(new ObjectWrapper(ObjectWrapper.BOARD_TYPING, typinggg));
+//                                    }
+//                                }
+//                                break;
+
                         }
 
                     }

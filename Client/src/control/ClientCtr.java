@@ -18,8 +18,9 @@ import model.Conversation;
 import model.IPAddress;
 import model.ObjectWrapper;
 import view.AddFriendFrm;
-import view.ChatConverstationFrm;
-import view.ChatCreateConvertstationFrm;
+import view.ChatCreateFrm;
+import view.ChatDashboardFrm;
+import view.ChatFrm;
 import view.DeleteFriendFrm;
 import view.FriendFrm;
 import view.MainFrm;
@@ -35,6 +36,18 @@ public class ClientCtr {
     private ClientListening myListening;                            // thread to listen the data from the server
     private ArrayList<ObjectWrapper> myFunction;                  // list of active client functions
     private IPAddress serverAddress = new IPAddress("localhost", 8888);  // default server host and port
+
+    // chat var
+    ArrayList<Conversation> listOpenConversation = new ArrayList<>();
+
+    public ArrayList<Conversation> getOpenConversation() {
+        return listOpenConversation;
+    }
+
+    public ArrayList<Conversation> updateOpenConversation(ArrayList<Conversation> list) {
+        this.listOpenConversation = list;
+        return listOpenConversation;
+    }
 
     public ClientCtr(MainFrm mainFrm) {
         super();
@@ -97,14 +110,19 @@ public class ClientCtr {
         }
 
         public void run() {
+            MainFrm mainFrmC;
             AddFriendFrm addFriendFrm;
             RequestFrm requestFrm;
             FriendFrm friendFrm;
-            ChatCreateConvertstationFrm chatCreateConvertstationFrm;
-            ChatConverstationFrm chatConverstationFrm;
+
             UserDetailFrm userDetailFrm;
             DeleteFriendFrm deleteFriendFrm;
             RequestDetailFrm requestDetailFrm;
+
+            // chat
+            ChatCreateFrm chatCreateFrm;
+            ChatDashboardFrm chatDashboard;
+            ChatFrm chatFrm;
             try {
                 while (true) {
                     ObjectInputStream ois = new ObjectInputStream(mySocket.getInputStream());
@@ -122,7 +140,7 @@ public class ClientCtr {
                             if (fto.getPerformative() == data.getPerformative()) {
                                 switch (data.getPerformative()) {
                                     case ObjectWrapper.REPLY_LOGIN_USER:
-                                        MainFrm mainFrm = (MainFrm) fto.getData();
+                                        mainFrm = (MainFrm) fto.getData();
                                         mainFrm.receivedDataProcessing(data);
                                         break;
                                     case ObjectWrapper.REPLY_SIGNUP_USER:
@@ -202,38 +220,53 @@ public class ClientCtr {
                                         friendFrm.receivedDataProcessing(data);
                                         break;
 
-                                    case ObjectWrapper.REPLY_CHAT_GET_CONVERSTATION: {
-                                        chatConverstationFrm = (ChatConverstationFrm) fto.getData();
-                                        chatConverstationFrm.receivedDataProcessing(data);
+                                    // chat ----------------------------
+                                    case ObjectWrapper.REPLY_CHAT_GET_CONVERSTATION: {// lay ds conversation
+                                        chatDashboard = (ChatDashboardFrm) fto.getData();
+                                        chatDashboard.receivedDataProcessing(data);
                                         break;
                                     }
 
-                                    case ObjectWrapper.REPLY_CHAT_GET_MESSAGE: {
-                                        chatConverstationFrm = (ChatConverstationFrm) fto.getData();
-                                        chatConverstationFrm.receivedDataMessage(data);
+                                    case ObjectWrapper.REPLY_CHAT_GET_MESSAGE: {// ds mess, nhan mess from other
+                                        //System.out.println("mess from other");
+                                        chatFrm = (ChatFrm) fto.getData();
+                                        chatFrm.receivedDataMessage(data);
                                         break;
                                     }
 
-                                    case ObjectWrapper.REPLY_CHAT_CREATE_MESSAGE: {
-                                        chatConverstationFrm = (ChatConverstationFrm) fto.getData();
-                                        chatConverstationFrm.receivedDataMessage(data);
+                                    case ObjectWrapper.REPLY_CHAT_CREATE_MESSAGE_DASHBOARD: {
+                                        try {
+                                            // System.out.println("mess from main");
+                                            mainFrmC = (MainFrm) fto.getData();
+                                            mainFrmC.receveNewMesseage(data);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        break;
+                                    }
+
+                                    case ObjectWrapper.REPLY_CHAT_CREATE_MESSAGE: { // sau khi gui mess
+                                        System.out.println("mess from chat");
+                                        chatFrm = (ChatFrm) fto.getData();
+                                        chatFrm.receivedDataMessage(data);
                                         break;
                                     }
 
                                     case ObjectWrapper.REPLY_CHAT_GET_LIST_FRIEND: {
-                                        chatCreateConvertstationFrm = (ChatCreateConvertstationFrm) fto.getData();
-                                        chatCreateConvertstationFrm.receivedDataProcessing(data);
+                                        chatCreateFrm = (ChatCreateFrm) fto.getData();
+                                        chatCreateFrm.receivedDataProcessing(data);
                                         break;
                                     }
 
                                     case ObjectWrapper.REPLY_CHAT_CREATE_CONVERSTATION: {
-                                        System.out.println("resultCreate");
-                                        if (fto.getData() instanceof ChatCreateConvertstationFrm) {
-                                            chatCreateConvertstationFrm = (ChatCreateConvertstationFrm) fto.getData();
-                                            chatCreateConvertstationFrm.resultCreate(data);
-                                        } else if (fto.getData() instanceof ChatConverstationFrm) {
-                                            chatConverstationFrm = (ChatConverstationFrm) fto.getData();
-                                            chatConverstationFrm.receivedDataProcessing(data);
+                                        //System.out.println("resultCreate");
+                                        if (fto.getData() instanceof ChatCreateFrm) {
+                                            chatCreateFrm = (ChatCreateFrm) fto.getData();
+                                            chatCreateFrm.resultCreate(data);
+                                        } else if (fto.getData() instanceof ChatCreateFrm) {
+                                            chatCreateFrm = (ChatCreateFrm) fto.getData();
+                                            chatCreateFrm.receivedDataProcessing(data);
                                         }
                                         break;
                                     }
@@ -242,9 +275,9 @@ public class ClientCtr {
                                         if (fto.getData() instanceof FriendFrm) {
                                             friendFrm = (FriendFrm) fto.getData();
                                             friendFrm.receivedDataProcessing(data);
-                                        } else if (fto.getData() instanceof ChatCreateConvertstationFrm) {
-                                            chatCreateConvertstationFrm = (ChatCreateConvertstationFrm) fto.getData();
-                                            chatCreateConvertstationFrm.receivedDataProcessing(data);
+                                        } else if (fto.getData() instanceof ChatCreateFrm) {
+                                            chatCreateFrm = (ChatCreateFrm) fto.getData();
+                                            chatCreateFrm.receivedDataProcessing(data);
                                         }
                                         break;
                                     }
@@ -254,6 +287,23 @@ public class ClientCtr {
                                             userDetailFrm = (UserDetailFrm) fto.getData();
                                             userDetailFrm.receivedDataProcessing(data);
                                         }
+                                        break;
+                                    }
+                                    // file 
+                                    case ObjectWrapper.REPLY_SEND_FILE: {
+                                        chatFrm = (ChatFrm) fto.getData();
+                                        chatFrm.replySendFile(data);
+                                        break;
+
+                                    }
+                                    case ObjectWrapper.REPLY_GET_LIST_FILE: {
+                                        chatFrm = (ChatFrm) fto.getData();
+                                        chatFrm.replyGetListFile(data);
+                                        break;
+                                    }
+                                    case ObjectWrapper.BOARD_TYPING: {
+                                        chatFrm = (ChatFrm) fto.getData();
+                                        chatFrm.boardTyping(data);
                                         break;
                                     }
                                 }
